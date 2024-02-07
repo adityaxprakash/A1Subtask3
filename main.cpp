@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
-#include "Headerfiles/basic.h"
-#include "Headerfiles/rsi.h"
+#include "headers/basic.h"
+#include "headers/rsi.h"
+#include "headers/mcad.h"
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -9,8 +10,8 @@ int main(int argc, char *argv[])
     std::string symbol = argv[2];
     int n = std::stoi(argv[3]);
     int x = std::stoi(argv[4]);
-    std::string start = argv[argc - 2];
-    std::string end = argv[argc - 1];
+    std::string start = argv[5];
+    std::string end = argv[6];
     // rest of your code
     if (strat == "BASIC")
     {
