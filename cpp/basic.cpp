@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include "../headers/basic.h"
 
 using namespace std;
 
@@ -13,10 +12,10 @@ class basic
 public:
     basic(int n, int x, string start, string end)
     {
-        n = n;
-        x = x;
-        start = start;
-        end = end;
+        this->n = n;
+        this->x = x;
+        this->start = start;
+        this->end = end;
     }
     void run(string filename, string cashname, string statname)
     {
@@ -28,12 +27,14 @@ public:
         int lastinc = 0;
         double lastday = 0;
         double accumul = 0;
-        string closval = 0;
+        string closval;
         int date;
         int netstocks = 0;
         std::ofstream cashfile(cashname);
         std::ofstream statfile(statname);
         cashfile << "Date,Cashflow\n";
+        statfile << "Date,Action,Quantity,Price,Value\n";
+        double profit = 0;
         while (std::getline(file, line))
         {
             if (date_counter == -1)
@@ -41,15 +42,17 @@ public:
                 date_counter++;
                 continue;
             }
+            
             std::stringstream ss(line);
             std::string date, closval;
             if (getline(ss, date, ',') && getline(ss, closval, ','))
             {
+                // cashfile << date << ","<<closval<<"\n";
                 if (date_counter == 0)
                 {
                     lastday = std::stod(closval);
                 }
-                if (date_counter > 0)
+                else if (date_counter > 0)
                 {
                     if (std::stod(closval) > lastday)
                     {
@@ -61,45 +64,40 @@ public:
                     }
                     lastday = std::stod(closval);
                 }
-            }
-            if (date_counter > n)
-            {
-                if (date_counter - lastinc > n)
+
+                if (date_counter > n - 1)
                 {
-                    if (accumul > -x)
+                    if (date_counter - lastinc > n-1)
                     {
-                        netstocks += 1;
-                        accumul += std::stod(closval);
-                        statfile << date << ","
-                                 << "BUY"
-                                 << "," << 1 << "," << closval << "," << accumul << "\n";
+                        if (accumul + stod(closval) < x)
+                        {
+                            netstocks -= 1;
+                            accumul += std::stod(closval);
+                            statfile << date << ","
+                                     << "SELL"
+                                     << "," << 1 << "," << closval << "\n";
+                        }
+                    }
+                    else if (date_counter - lastdec > n-1)
+                    {
+                        if (accumul - stod(closval) >-x)
+                        {
+                            netstocks += 1;
+                            accumul -= std::stod(closval);
+                            statfile << date << ","
+                                     << "BUY"
+                                     << "," << 1 << "," << closval << "\n";
+                        }
                     }
                     cashfile << date << "," << accumul << "\n";
-                }
-                else if (date_counter - lastdec > n)
-                {
-                    if (accumul < x)
-                    {
-                        netstocks -= 1;
-                        accumul -= std::stod(closval);
-                        statfile << date << ","
-                                 << "SELL"
-                                 << "," << 1 << "," << closval << "," << accumul << "\n";
+                    if (file.peek()==EOF){
+                        profit = netstocks * std::stod(closval) + accumul;
                     }
-                    cashfile << date << "," << accumul << "\n";
-                }
-                else
-                {
-                    cashfile << date << "," << accumul << "\n";
                 }
             }
             date_counter++;
         }
+        ofstream finalfile("final_pl.csv");
+        finalfile << "Basic"<<","<<profit<<","<<"\n";
     }
 };
-int main()
-{
-    basic b(10, 100, "2020-01-01", "2020-12-31");
-    b.run("../SBIN.csv", "../cash.csv", "../stat.csv");
-    return 0;
-}
