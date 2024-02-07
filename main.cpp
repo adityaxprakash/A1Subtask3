@@ -12,6 +12,9 @@ int main(int argc, char *argv[])
     int x = std::stoi(argv[4]);
     std::string start = argv[5];
     std::string end = argv[6];
+    stringstream ss;
+    ss << "python3 ../main.py " << symbol << " " << n << " " << start << " " << end;
+    system(ss.str().c_str());
     // rest of your code
     if (strat == "BASIC")
     {
