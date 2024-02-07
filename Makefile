@@ -1,6 +1,6 @@
 # Define the compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++11
+CXXFLAGS = -g -Wall -Wextra -std=c++11
 
 # Define the sources directory
 SRCDIR = src
@@ -21,7 +21,7 @@ OBJECTS := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SOURCES))
 EXECUTABLE = main
 
 # Main target
-all: $(EXECUTABLE) run clean
+all: $(EXECUTABLE) run
 
 # Rule to build the executable
 $(EXECUTABLE): $(OBJECTS)
