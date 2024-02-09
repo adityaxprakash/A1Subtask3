@@ -1,17 +1,6 @@
-#include <dma.h>
+#include "dma.h"
 
-ofstream cashfile;
-ofstream statfile;
-ofstream pandlfile;
-
-vector<string> dates = {""};
-vector<double> prices = {0};
-vector<double> dmaverage = {0};
-vector<double> sd = {0};
-int curr_stocks = 0;
-int curr_position = 0;
-
-dma::dma(string start, string end, int n_, double x_, double p_)
+dma::dma(string start, string end, int n_, double x_, int p_)
 {
     start_date = start;
     end_date = end;
@@ -20,13 +9,13 @@ dma::dma(string start, string end, int n_, double x_, double p_)
     p = p_;
 }
 
-void write_daily_flow(string date, double cashflow)
+void dma::write_daily_flow(string date, double cashflow)
 {
     string to_write = date + " " + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
-void write_orders(string date, string action, string quantity, double price)
+void dma::write_orders(string date, string action, string quantity, double price)
 {
     string to_write = date + "," + action + "," + quantity + "," + to_string(price) + "\n";
     statfile << to_write;
@@ -59,39 +48,32 @@ void dma::simulate_trades()
 
     for (int i = 1; i < sim_period; i++)
     {
-        double cashflow = 0;
         double curr_dma = dmaverage[i];
         double curr_sd = sd[i];
         double curr_price = prices[i + n];
         string today = dates[i + n];
 
-        if (curr_price - curr_dma >= p * curr_sd)
+        if (curr_price - curr_dma >= p * curr_sd && position<x)
         {
-
-            if (curr_position + curr_price > x)
-            {
-                continue;
-            }
-            curr_position += curr_price;
-            curr_stocks++;
+            cashflow -= curr_price;
+            position++;
             write_orders(today, "BUY", "1", curr_price);
         }
-        else if (curr_dma - curr_price >= p * curr_sd)
+        else if (curr_dma - curr_price >= p * curr_sd && position>-x)
         {
-            if (curr_position - curr_price < -x)
+            if (position==-x)
             {
                 continue;
             }
-            curr_position -= curr_price;
-            curr_stocks--;
+            cashflow += curr_price;
+            position--;
             write_orders(today, "SELL", "1", curr_price);
         }
-        cashflow = -curr_position;
         write_daily_flow(today, cashflow);
     }
 
-    double square_off = curr_stocks * prices.back();
-    string p_and_l = to_string(square_off - curr_position);
+    double square_off = position * prices.back();
+    string p_and_l = to_string(square_off + cashflow);
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
 }
 
