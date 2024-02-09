@@ -1,6 +1,6 @@
 # Define the compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++11
+CXXFLAGS = -g -Wall -Wextra -std=c++11
 
 # Define the sources directory
 SRCDIR = src
@@ -21,7 +21,7 @@ OBJECTS := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SOURCES))
 EXECUTABLE = main
 
 # Main target
-all: $(EXECUTABLE) run clean
+all: $(EXECUTABLE) run
 
 # Rule to build the executable
 $(EXECUTABLE): $(OBJECTS)
@@ -44,7 +44,7 @@ clean:
 
 # Additional target to run the program with command-line arguments
 run:
-	@./$(EXECUTABLE) $(strategy) $(symbol) $(n) $(x) "$(start_date)" "$(end_date)" $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold) 
+	@./$(EXECUTABLE) $(strategy) $(symbol) $(n) $(x) "$(start_date)" "$(end_date)" $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold) $(train_start_date) $(train_end_date) 
 
 strategy ?= DEFAULT_STRATEGY
 symbol ?= DEFAULT_SYMBOL
@@ -52,12 +52,14 @@ start_date ?= DEFAULT_START_DATE
 end_date ?= DEFAULT_END_DATE
 n ?= 0
 x ?= 0
-p ?= DEFAULT_P
-max_hold_days ?= DEFAULT_MAX_HOLD_DAYS
-c1 ?= DEFAULT_C1
-c2 ?= DEFAULT_C2
-oversold_threshold ?= DEFAULT_OVERSOLD_THRESHOLD
-overbought_threshold ?= DEFAULT_OVERBOUGHT_THRESHOLD
-adx_threshold ?= DEFAULT_ADX_THRESHOLD
+p ?= 0
+max_hold_days ?= 0
+c1 ?= 0
+c2 ?= 0
+oversold_threshold ?= 0
+overbought_threshold ?= 0
+adx_threshold ?= 0
+train_start_date ?= DEFAULT_TRAIN_START_DATE
+train_end_date ?= DEFAULT_TRAIN_END_DATE
 
 
