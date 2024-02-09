@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include "headers/basic.h"
 #include "headers/rsi.h"
-#include "headers/mcad.h"
+#include "headers/macd.h"
 using namespace std;
 
 int main(int argc, char *argv[])
