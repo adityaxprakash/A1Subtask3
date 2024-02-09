@@ -1,6 +1,6 @@
 #include "../headers/basic.h"
 
-basic::basic(string start, string end, int n_, double x_)
+basic::basic(string start, string end, double x_, int n_)
 {
     this->start_date = start;
     this->end_date = end;
@@ -11,44 +11,26 @@ basic::basic(string start, string end, int n_, double x_)
 void basic::calculate_basic()
 {
     int num_days = dates.size();
-    int lastinc = 0;   
-    int lastdec = 0; 
-    double lastday = 0; 
-    int netstocks = 0;
-    for (int i = 0; i < num_days; i++)
+    increases.resize(num_days, 0);
+    decreases.resize(num_days, 0);
+    for (int i = 2; i < num_days; i++)
     {
-        if (i == 0)
+        if (prices[i] > prices[i - 1])
         {
-            lastday = prices[i];
+            increases[i] = increases[i - 1] + 1;
         }
-        else if (i > 0)
+        else 
         {
-            if (prices[i] > lastday)
-            {
-                lastinc = i;
-            }
-            else if (prices[i] < lastday)
-            {
-                lastdec = i;
-            }
-            else{
-                lastinc = i;
-                lastdec = i;
-            }
-            lastday = prices[i];
-        }   
-        if (i > n - 1)
+            increases[i] = increases[i - 1];
+        }
+        if (prices[i] < prices[i - 1])
         {
-            if (i -lastinc >n-1){
-                last_n.push_back(-1);
-            }
-            else if (i -lastdec >n-1){
-                last_n.push_back(1);
-            }
-            else{
-                last_n.push_back(0);
-            }
-        } 
+            decreases[i] = decreases[i - 1] + 1;
+        }
+        else
+        {
+            decreases[i] = decreases[i - 1];
+        }
     }
 }
 
@@ -65,38 +47,38 @@ void basic::write_orders(string date, string action, string quantity, double pri
 }
 void basic::simulate_trades()
 {
-    int num_days = dates.size();
+    int num_days = increases.size();
+
     cashflow = 0;
     position = 0;
-    for (int i = 0; i < num_days; i++)
+
+    for (int i = n + 1; i < num_days; i++)
     {
-        if (last_n[i] == -1)
+        double curr_price = prices[i];
+        string today = dates[i];
+
+        if (decreases[i] - decreases[i - n] == n && position > -x)
         {
-            if (position >-x)
-            {
-                position -= 1;
-                cashflow += prices[i];
-                write_orders(dates[i], "SELL", "1", prices[i]);
-            }
+            position -= 1;
+            cashflow += curr_price;
+            write_orders(today, "SELL", "1", curr_price);
         }
-        else if (last_n[i] == 1)
+        else if (increases[i] - increases[i - n] == n && position < x)
         {
-            if (position < x)
-            {
-                position += 1;
-                cashflow -= prices[i];
-                write_orders(dates[i], "BUY", "1", prices[i]);
-            }
+            position += 1;
+            cashflow -= curr_price;
+            write_orders(today, "BUY", "1", curr_price);
         }
         write_daily_flow(dates[i], cashflow);
     }
     double square_off = position * prices.back();
     string p_and_l = to_string(square_off + cashflow);
-    pandlfile << "Basic" << "," << p_and_l << "\n";
+    pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
+    
 }
 
-
-void basic::run(string infile, string cashflow_file, string order_stats_file, string pandl_file){
+void basic::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+{
     ifstream file(infile);
     cashfile.open(cashflow_file);
     statfile.open(order_stats_file);
@@ -126,7 +108,7 @@ void basic::run(string infile, string cashflow_file, string order_stats_file, st
             dates.push_back(date);
         }
     }
-    //cout << "Read " << prices[10] << " prices" << '\n';
+    // cout << "Read " << prices[10] << " prices" << '\n';
     calculate_basic();
 
     simulate_trades();
@@ -136,11 +118,3 @@ void basic::run(string infile, string cashflow_file, string order_stats_file, st
     cashfile.close();
     pandlfile.close();
 }
-
-
-
-
-
-
-
-
