@@ -1,72 +1,79 @@
-#include "macd.h"
+#include "rsi.h"
 
-macd::macd(string start, string end, double x_, int n_)
+rsi::rsi(string start, string end, int n_, double x_, double oversold, double overbought)
 {
     start_date = start;
     end_date = end;
-    x = x_;
     n = n_;
+    x = x_;
+    oversold_threshold = oversold;
+    overbought_threshold = overbought;
 }
 
-void macd::write_daily_flow(string date, double cashflow)
+void rsi::write_daily_flow(string date, double cashflow)
 {
     string to_write = date + " " + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
-void macd::write_orders(string date, string action, string quantity, double price)
+void rsi::write_orders(string date, string action, string quantity, double price)
 {
     string to_write = date + "," + action + "," + quantity + "," + to_string(price) + "\n";
     statfile << to_write;
 }
 
-double calculate_ewm(int k, vector<double> &base, int idx)
-{
-    double ewm = base[idx - k];
-    double alpha = 2 / (k + 1);
-    for (int i = k - 1; i >= 1; i--)
-    {
-        ewm = alpha * base[idx - i] + (1 - alpha) * ewm;
-    }
-    return ewm;
-}
-
-void macd::calculate_macd()
+void rsi::calculate_gain_loss()
 {
     int num_days = prices.size();
-    vector<double> short_ewm(num_days, 0);
-    vector<double> long_ewm(num_days, 0);
-    macd_arr.resize(num_days, 0);
-    for (int i = n + 1 - macd_n; i < num_days; i++)
+    vector<double> gain(num_days, 0);
+    vector<double> loss(num_days, 0);
+
+    for (int i = 1; i < num_days; i++)
     {
-        short_ewm[i] = calculate_ewm(short_n, prices, i);
-        long_ewm[i] = calculate_ewm(long_n, prices, i);
-        macd_arr[i] = short_ewm[i] - long_ewm[i];
+        gain[i] = gain[i - 1] + max(prices[i] - prices[i - 1], 0.0);
+        loss[i] = loss[i - 1] + max(prices[i - 1] - prices[i], 0.0);
     }
     for (int i = n + 1; i < num_days; i++)
     {
-        signal_line.push_back(calculate_ewm(macd_n, macd_arr, i));
+        avg_gain.push_back((gain[i] - gain[i - n]) / n);
+        avg_loss.push_back((loss[i] - loss[i - n]) / n);
     }
 }
 
-void macd::simulate_trades()
+void rsi::simulate_trades()
 {
-    int sim_period = signal_line.size();
+    int sim_period = avg_gain.size();
 
     for (int i = 1; i < sim_period; i++)
     {
-        double curr_signal = signal_line[i];
-        double curr_macd = macd_arr[i+n];
+        double curr_avg_gain = avg_gain[i];
+        double curr_avg_loss = avg_loss[i];
         double curr_price = prices[i + n];
         string today = dates[i + n];
+        double curr_rsi;
+        if (curr_avg_loss == 0)
+        {
+            curr_rsi = 100;
+        }
+        else
+        {
+            double rs = curr_avg_gain / curr_avg_loss;
+            curr_rsi = 100 - (100.0 / (1 + rs));
+        }
 
-        if (curr_macd > curr_signal && position<x)
+        if (overbought_threshold == oversold_threshold && curr_rsi == overbought_threshold)
+        {
+            write_daily_flow(today, cashflow);
+            continue;
+        }
+
+        if (curr_rsi >= overbought_threshold && position < x)
         {
             cashflow -= curr_price;
             position++;
             write_orders(today, "BUY", "1", curr_price);
         }
-        else if (curr_macd < curr_signal && position>-x)
+        else if (curr_rsi <= oversold_threshold && position > -x)
         {
             cashflow += curr_price;
             position--;
@@ -81,7 +88,7 @@ void macd::simulate_trades()
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
 }
 
-void macd::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+void rsi::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
 {
     ifstream file(infile);
     cashfile.open(cashflow_file);
@@ -113,7 +120,7 @@ void macd::run(string infile, string cashflow_file, string order_stats_file, str
         }
     }
 
-    calculate_macd();
+    calculate_gain_loss();
 
     simulate_trades();
 

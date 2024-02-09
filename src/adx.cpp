@@ -1,26 +1,27 @@
-#include "macd.h"
+#include "adx.h"
 
-macd::macd(string start, string end, double x_, int n_)
+adx::adx(string start, string end, double x_, int n_, double threshhold)
 {
     start_date = start;
     end_date = end;
     x = x_;
     n = n_;
+    adx_threshhold = threshhold;
 }
 
-void macd::write_daily_flow(string date, double cashflow)
+void adx::write_daily_flow(string date, double cashflow)
 {
     string to_write = date + " " + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
-void macd::write_orders(string date, string action, string quantity, double price)
+void adx::write_orders(string date, string action, string quantity, double price)
 {
     string to_write = date + "," + action + "," + quantity + "," + to_string(price) + "\n";
     statfile << to_write;
 }
 
-double calculate_ewm(int k, vector<double> &base, int idx)
+double adx::calculate_ewm(int k, vector<double> &base, int idx)
 {
     double ewm = base[idx - k];
     double alpha = 2 / (k + 1);
@@ -31,42 +32,52 @@ double calculate_ewm(int k, vector<double> &base, int idx)
     return ewm;
 }
 
-void macd::calculate_macd()
+void adx::calculate_adx()
 {
     int num_days = prices.size();
-    vector<double> short_ewm(num_days, 0);
-    vector<double> long_ewm(num_days, 0);
-    macd_arr.resize(num_days, 0);
-    for (int i = n + 1 - macd_n; i < num_days; i++)
+    vector<double>true_range={0};
+    vector<double>plus_dm={0};
+    vector<double>minus_dm={0};
+    vector<double>plus_di={0};
+    vector<double>minus_di={0};
+    vector<double> plus_atr = {0};
+    vector<double> minus_atr = {0};
+    vector<double> dx={0};
+    for(int i=1;i<num_days;i++)
     {
-        short_ewm[i] = calculate_ewm(short_n, prices, i);
-        long_ewm[i] = calculate_ewm(long_n, prices, i);
-        macd_arr[i] = short_ewm[i] - long_ewm[i];
+        true_range.push_back(max(high[i]-low[i],max(high[i]-prev_close[i],low[i]-prev_close[i])));
+        plus_dm.push_back(max(0.0,high[i]-high[i-1]));
+        minus_dm.push_back(max(0.0,low[i]-low[i-1]));
     }
-    for (int i = n + 1; i < num_days; i++)
+    for(int i=n+1;i<num_days;i++)
     {
-        signal_line.push_back(calculate_ewm(macd_n, macd_arr, i));
+        double curr_atr=calculate_ewm(n,true_range,i);
+        plus_atr.push_back(plus_dm[i]/curr_atr);
+        minus_atr.push_back(minus_dm[i]/curr_atr);
+        plus_di.push_back(calculate_ewm(n,plus_atr,i));
+        minus_di.push_back(calculate_ewm(n,minus_atr,i));
+        dx.push_back(100*(plus_di[i]-minus_di[i])/(plus_di[i]+minus_di[i]));
+        adx_arr.push_back(calculate_ewm(n,dx,i));
     }
 }
 
-void macd::simulate_trades()
+void adx::simulate_trades()
 {
-    int sim_period = signal_line.size();
+    int sim_period = adx_arr.size();
 
     for (int i = 1; i < sim_period; i++)
     {
-        double curr_signal = signal_line[i];
-        double curr_macd = macd_arr[i+n];
+        double curr_adx = adx_arr[i];
         double curr_price = prices[i + n];
         string today = dates[i + n];
 
-        if (curr_macd > curr_signal && position<x)
+        if (curr_adx > adx_threshhold && position < x)
         {
             cashflow -= curr_price;
             position++;
             write_orders(today, "BUY", "1", curr_price);
         }
-        else if (curr_macd < curr_signal && position>-x)
+        else if (curr_adx <adx_threshhold && position > -x)
         {
             cashflow += curr_price;
             position--;
@@ -81,7 +92,7 @@ void macd::simulate_trades()
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
 }
 
-void macd::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+void adx::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
 {
     ifstream file(infile);
     cashfile.open(cashflow_file);
@@ -100,20 +111,23 @@ void macd::run(string infile, string cashflow_file, string order_stats_file, str
     while (getline(file, line))
     {
         stringstream ss(line);
-        string date, price;
+        string date, highp, lowp, prev_closep,price;
         line_number++;
-        if (getline(ss, date, ',') && getline(ss, price, ','))
+        if (getline(ss, date, ',')&& getline(ss, price, ',') && getline(ss, highp, ',') && getline(ss, lowp, ',') && getline(ss, prev_closep, ','))
         {
             if (line_number == 1)
             {
                 continue;
             }
+            high.push_back(stod(highp));
+            low.push_back(stod(lowp));
             prices.push_back(stod(price));
+            prev_close.push_back(stod(prev_closep));
             dates.push_back(date);
         }
     }
 
-    calculate_macd();
+    calculate_adx();
 
     simulate_trades();
 
