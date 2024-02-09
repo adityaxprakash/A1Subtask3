@@ -1,24 +1,101 @@
 #include "../headers/lr.h"
 
+vector<double> fr;
+
 vector<vector<double>> training_data;
 vector<double> means, std_devs;
 
-MatrixXd X_train;
-VectorXd Y_train;
-VectorXd theta;
+vector<vector<double>> x_train;
+vector<vector<double>> y_train;
+
+
+vector<vector<double>> x_test;
+vector<vector<double>> y_test;
+vector<vector<double>> predictions_values;
+vector<vector<double>> theta_values;
+
 double alpha;
 int num_iters;
 
 vector<string> dates;
 
-MatrixXd X_test;
-VectorXd Y_test;
 
-VectorXd predictions;
 
 ofstream cashfile;
 ofstream statfile;
 ofstream pandlfile;
+
+vector<vector<double>> matrix_multiplication(vector<vector<double>> A, vector<vector<double>> B)
+{
+    vector<vector<double>> result;
+    for (int i = 0; i < A.size(); i++)
+    {
+        vector<double> row;
+        for (int j = 0; j < B[0].size(); j++)
+        {
+            double sum = 0;
+            for (int k = 0; k < A[0].size(); k++)
+            {
+                sum += A[i][k] * B[k][j];
+            }
+            row.push_back(sum);
+        }
+        result.push_back(row);
+    }
+    return result;
+}
+
+vector<vector<double>> transpose(vector<vector<double>> A)
+{
+    vector<vector<double>> result;
+    for (int i = 0; i < A[0].size(); i++)
+    {
+        vector<double> row;
+        for (int j = 0; j < A.size(); j++)
+        {
+            row.push_back(A[j][i]);
+        }
+        result.push_back(row);
+    }
+    return result;
+}
+
+vector<vector<double>> inverse(vector<vector<double>> A)
+{
+    const double EPS = 1E-9;
+    int n = A.size();
+    std::vector<std::vector<double>> res(n, std::vector<double>(n));
+    for (int i = 0; i < n; ++i)
+        res[i][i] = 1;
+
+    for (int i = 0; i < n; ++i)
+    {
+        int maxj = i;
+        for (int j = i + 1; j < n; ++j)
+            if (abs(A[j][i]) > abs(A[maxj][i]))
+                maxj = j;
+        if (abs(A[maxj][i]) < EPS)
+            throw std::runtime_error("No inverse exists");
+        std::swap(A[i], A[maxj]);
+        std::swap(res[i], res[maxj]);
+
+        double d = A[i][i];
+        for (int j = 0; j < n; ++j)
+        {
+            A[i][j] /= d;
+            res[i][j] /= d;
+        }
+
+        for (int j = 0; j < n; ++j)
+            if (j != i && abs(A[j][i]) > EPS)
+                for (int k = 0; k < n; ++k)
+                {
+                    A[j][k] -= A[i][k] * A[j][i];
+                    res[j][k] -= res[i][k] * A[j][i];
+                }
+    }
+    return res;
+}
 
 lr::lr(string start, string end, double x, double p, string train_start, string train_end)
 {
@@ -30,7 +107,7 @@ lr::lr(string start, string end, double x, double p, string train_start, string 
     this->train_end_date = train_end;
 }
 
-void lr::read_file(string train_file, MatrixXd &X, VectorXd &Y)
+void lr::read_file(string train_file, vector<vector<double>> &x, vector<vector<double>> &y)
 {
     cout << "Reading file" << endl;
     ifstream file(train_file);
@@ -47,19 +124,6 @@ void lr::read_file(string train_file, MatrixXd &X, VectorXd &Y)
         vector<double> row;
         stringstream ss(line);
         string datee;
-        // if (ss>>datee){
-        //     dates.push_back(datee);
-        //     continue;
-        // }
-        // row.push_back(1);
-        // while (ss >> value)
-        // {
-        //     row.push_back(value);
-        //     if (ss.peek() == ',')
-        //         ss.ignore();
-        // }
-
-        // training_data.push_back(row);
         int c = 0;
         while (getline(ss, datee, ','))
         {
@@ -76,35 +140,33 @@ void lr::read_file(string train_file, MatrixXd &X, VectorXd &Y)
         training_data.push_back(row);
     }
     file.close();
-    training_data.erase(training_data.begin());
-    cout << "File read" << endl;
-    
-    int wow = 0;
-    cout << training_data.size() << endl;
-    cout << training_data[0].size() << endl;
-    for (int i = 0; i < training_data.size(); i++)
-    {
-        if (training_data[i].size() != 6)
-            cout << training_data[i].size() << " " << i << endl;
-        wow++;
-    }
 
     cout << "Data read" << endl;
+
     for (int i = 0; i < training_data.size(); i++)
     {
-        training_data[i].push_back(training_data[i][training_data[i].size() - 1]);
-        if (i < training_data.size() - 1)
-            training_data[i][training_data[i].size() - 1] = training_data[i + 1][training_data[i + 1].size() - 1];
-        else
-            training_data[i][training_data[i].size() - 2] = 0;
-        double temp = training_data[i].back();
-        training_data[i][training_data[i].size() - 1] = training_data[i][training_data[i].size() - 3];
-        training_data[i][training_data[i].size() - 3] = temp;
+        // training_data[i].push_back(training_data[i][training_data[i].size() - 1]);
+        // if (i < training_data.size() - 1)
+        //     training_data[i][training_data[i].size() - 1] = training_data[i + 1][training_data[i + 1].size() - 1];
+        // else
+        //     training_data[i][training_data[i].size() - 2] = 0;
+        // double temp = training_data[i].back();
+        // training_data[i][training_data[i].size() - 1] = training_data[i][training_data[i].size() - 3];
+        // training_data[i][training_data[i].size() - 3] = temp;
+        if (i < training_data.size() - 1){
+            training_data[i].push_back(training_data[i + 1][training_data[i + 1].size() - 2]);
+            training_data[i].push_back(training_data[i + 1][training_data[i + 1].size() - 2]);
+        }
+        else{
+            training_data[i].push_back(0);
+            training_data[i].push_back(0);
+        }    
     }
+
     cout << "Data transformed" << endl;
     training_data.erase(training_data.end());
 
-    // normalise the data and convert
+    
     for (int i = 0; i < training_data[0].size(); i++)
     {
         double mean = 0;
@@ -129,26 +191,32 @@ void lr::read_file(string train_file, MatrixXd &X, VectorXd &Y)
         }
     }
     cout << "Data normalised" << endl;
-    // loading into matrix
-    X = MatrixXd(training_data.size(), training_data[0].size() - 1);
-    Y = VectorXd(training_data.size());
+
+    
     for (int i = 0; i < training_data.size(); i++)
     {
+        x.push_back(fr);
+        x[i].push_back(1);
         for (int j = 0; j < training_data[0].size() - 1; j++)
         {
-            X(i, j) = training_data[i][j];
+            
+            x[i].push_back(training_data[i][j]);
         }
-
-        Y(i) = training_data[i][training_data[0].size() - 1];
+        y.push_back(fr);
+        y[i].push_back(training_data[i][training_data[0].size() - 1]);
+        
     }
+
+    cout << "x_train size: " << x.size() << " " << x[0].size() << endl;
+    cout << "y_train size: " << y.size() << " " << y[0].size() << endl;
     cout << "Data loaded into matrix" << endl;
     training_data.clear();
 }
 
 void normal_equation()
 {
-    theta = Eigen::VectorXd::Zero(X_train.cols());
-    theta = (X_train.transpose() * X_train).inverse() * X_train.transpose() * Y_train;
+    theta_values = matrix_multiplication(inverse(matrix_multiplication(transpose(x_train), x_train)), matrix_multiplication(transpose(x_train), y_train));
+    cout << "Theta values: " << theta_values.size() << " " << theta_values[0].size() << endl;
 }
 
 void write_daily_flow(string date, double cashflow)
@@ -157,7 +225,6 @@ void write_daily_flow(string date, double cashflow)
     // cashfile << "Date, Cashflow\n";
     string to_write = date + "," + to_string(cashflow) + "\n";
     cashfile << to_write;
-    
 }
 
 void write_orders(string date, string action, string quantity, double price)
@@ -166,27 +233,33 @@ void write_orders(string date, string action, string quantity, double price)
     statfile << to_write;
 }
 
-void lr::simulate_trade(string cashflow_file, string order_stats_file, string pandl_file)
+double lr::simulate_trade(string cashflow_file, string order_stats_file, string pandl_file)
 {
     ofstream cashfile(cashflow_file);
     ofstream statfile(order_stats_file);
     ofstream pandlfile(pandl_file);
     cashfile << "Date, Cash\n";
-    predictions = X_test * theta;
-    for (int i = 0; i < predictions.size(); i++)
+    predictions_values = matrix_multiplication(x_test, theta_values);
+    cout << "Predictions size: " << predictions_values.size() << " " << predictions_values[0].size() << endl;
+
+    for (int i = 0; i < predictions_values.size(); i++)
     {
-        predictions[i] = predictions[i] * std_devs[std_devs.size() - 1] + means[means.size() - 1];
+        predictions_values[i][0] = predictions_values[i][0] * std_devs[std_devs.size() - 1] + means[means.size() - 1];
+    }
+    for (int i = 0; i < y_test.size(); i++)
+    {
+        y_test[i][0] = y_test[i][0] * std_devs[std_devs.size() - 1] + means[means.size() - 1];
     }
 
-    int siumation_days = X_test.rows();
+    int siumation_days = x_test.size();
     double cashflow = 0;
     int current_position = 0;
     double current_price = 0;
     double current_cash = 0;
     for (int i = 0; i < siumation_days; i++)
     {
-        current_price = Y_test(i);
-        if (predictions(i) > (100 + p) * (Y_test(i)) / 100)
+        cout<<"Predictions: "<<predictions_values[i][0]<<" "<<y_test[i][0]<<endl;
+        if (predictions_values[i][0] > (100 + p) * (y_test[i][0]) / 100)
         {
             if (current_position == x)
             {
@@ -195,11 +268,13 @@ void lr::simulate_trade(string cashflow_file, string order_stats_file, string pa
             else
             {
                 current_position++;
-                current_cash += Y_test(i);
-                write_orders(dates[i], "BUY", "1", Y_test(i));
+                current_cash -= y_test[i][0];
+                statfile << dates[i] << ",BUY,1," << y_test[i][0] << endl;
+                
             }
         }
-        else if (predictions(i) < (100 - p) * (Y_test(i)) / 100)
+       
+        else if (predictions_values[i][0] < (100 - p) * (y_test[i][0]) / 100)
         {
             if (current_position == -x)
             {
@@ -208,45 +283,28 @@ void lr::simulate_trade(string cashflow_file, string order_stats_file, string pa
             else
             {
                 current_position--;
-                current_cash -= Y_test(i);
-                write_orders(dates[i], "SELL", "1", Y_test(i));
+                current_cash += y_test[i][0];
+                statfile << dates[i] << ",SELL,1," << y_test[i][0] << endl;
             }
         }
-        cashflow = -current_cash;
-        // string to_write = dates[i] + "," + to_string(cashflow) + "\n";
-        // cashfile << to_write;
-        cout<<dates[i]<<" "<<cashflow<<endl;
-        write_daily_flow(dates[i], cashflow);
+        cashflow = current_cash;
+        string to_write = dates[i] + "," + to_string(cashflow) + "\n";
+        cashfile << to_write;
     }
-    double final_cash = -current_cash + current_position * current_price;
-    string pandl = to_string(final_cash);
-    pandlfile << pandl + "\n"
-              << endl;
+    double final_cash = current_cash + current_position * y_test[siumation_days - 1][0];
+    
+    return final_cash;
 }
 
-void lr::run(string infile, string cashflow_file, string train_file, string order_stats_file, string pandl_file)
+double lr::run(string infile, string cashflow_file, string train_file, string order_stats_file, string pandl_file)
 {
     cout << "Running" << endl;
-    read_file(train_file, X_train, Y_train);
+    read_file(train_file, x_train, y_train);
     cout << "Training data read" << endl;
-    read_file(infile, X_test, Y_test);
+    read_file(infile, x_test, y_test);
     cout << "Test data read" << endl;
-    alpha = 0.01;
-    num_iters = 1000;
-
     normal_equation();
     cout << "Normal equation done" << endl;
-    simulate_trade(cashflow_file, order_stats_file, pandl_file);
+    return simulate_trade(cashflow_file, order_stats_file, pandl_file);
     cout << "Simulation done" << endl;
-}
-
-// input format for the training file
-//  date, some 7 value, closing price
-// input format for the test file is same as the one for the training file
-
-int main()
-{
-    lr l("2019-01-01", "2019-12-31", 1000, 1.0, "2019-01-01", "2019-12-31");
-    l.run("test.csv", "ca.csv", "train.csv", "order_stats.csv", "pandl.csv");
-    return 0;
 }
