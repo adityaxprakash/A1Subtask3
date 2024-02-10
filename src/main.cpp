@@ -4,6 +4,7 @@
 #include "rsi.h"
 #include "macd.h"
 #include "adx.h"
+#include "basic.h"
 
 using namespace std;
 
@@ -21,7 +22,6 @@ int main(int argc, char *argv[])
     string strat = argv[1];
     string symbol = argv[2];
     int n = stoi(argv[3]);
-    
     double x = stod(argv[4]);
     string start_date = argv[5];
     string end_date = argv[6];
@@ -66,6 +66,11 @@ int main(int argc, char *argv[])
     else if(strat=="ADX")
     {
         adx tool(start_date,end_date, x, n, adx_thresh);
+        tool.run(infile_name, cashflow_name, order_name, pandl_name);
+    }
+    else if(strat=="BASIC")
+    {
+        basic tool(start_date,end_date, x, n);
         tool.run(infile_name, cashflow_name, order_name, pandl_name);
     }
     else

@@ -13,7 +13,9 @@ private:
     ofstream pandlfile;
     vector<string> dates = {""};
     vector<double> prices = {0};
-    vector<int> last_n={0};
+    vector<int> increases;
+    vector<int> decreases;
+
     
     int position = 0;
     double cashflow = 0;
@@ -24,6 +26,6 @@ private:
     void write_orders(string date, string action, string quantity, double price);
 
 public:
-    basic(string start, string end, int n_, double x_);
+    basic(string start, string end,  double x_, int n_);
     void run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
 };
