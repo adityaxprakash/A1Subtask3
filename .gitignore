@@ -1,5 +1,4 @@
 main
-build
+build/*
 .vscode
-src/lr2.cpp
-headers/lr2.h
+data/*

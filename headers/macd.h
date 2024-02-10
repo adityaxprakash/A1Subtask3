@@ -9,10 +9,10 @@ private:
     int long_n=26;
     int short_n=12;
     int macd_n=9;
-    int n;
-    double x;
+    // int n;
+    int x;
     vector<double> signal_line={0};
-    vector<double> macd_arr;
+    vector<double> macd_arr={0};
 
     ofstream cashfile;
     ofstream statfile;
@@ -23,11 +23,11 @@ private:
     double cashflow = 0;
 
     void calculate_macd();
-    void simulate_trades();
+    double simulate_trades();
     void write_daily_flow(string date, double cashflow);
     void write_orders(string date, string action, string quantity, double price);
 
 public:
-    macd(string start, string end, double x_, int n_);
-    void run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
+    macd(string start, string end, int x_);
+    double run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
 };
