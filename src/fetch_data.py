@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 import sys
 
-def write_stock_data(symbol_name, start_date, end_date, n, output_file,strategy):
+def write_stock_data(symbol_name, start_date, end_date, n, output_file):
     start_date = datetime.strptime(start_date, "%d/%m/%Y")
     end_date = datetime.strptime(end_date, "%d/%m/%Y")
     columns=['DATE','CLOSE','OPEN','HIGH','LOW','NO OF TRADES','PREV. CLOSE','VWAP']
@@ -26,14 +26,13 @@ def get_stock_data(symbol_name, start_date, end_date,n,columns):
     return df[columns]
 
 def main():
-    if len(sys.argv) == 7:
+    if len(sys.argv) == 6:
         symbol_name=sys.argv[1]
         start_date=sys.argv[2]
         end_date=sys.argv[3]
         n=int(sys.argv[4])
         file_name = sys.argv[5]
-        strategy=sys.argv[6]
-        write_stock_data(symbol_name, start_date, end_date, n, file_name,strategy)
+        write_stock_data(symbol_name, start_date, end_date, n, file_name)
     
     else:
         print("Incorrect command line arguments provided.")
