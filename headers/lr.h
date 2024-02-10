@@ -20,8 +20,3 @@ public:
     lr(string start, string end, double x, double p, string train_start, string train_end);
     double run(string infile, string cashflow_file, string train_file, string order_stats_file, string pandl_file);
 };
-
-public:
-    lr(string start, string end, double x, double p, string train_start, string train_end);
-    double run(string infile, string cashflow_file, string train_file, string order_stats_file, string pandl_file);
-};
