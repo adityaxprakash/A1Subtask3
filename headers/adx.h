@@ -7,7 +7,7 @@ private:
     string start_date;
     string end_date;
     int n;
-    double x;
+    int x;
     double adx_threshhold;
     vector<double> adx_arr={0};
 
@@ -24,12 +24,12 @@ private:
     double cashflow = 0;
 
     void calculate_adx();
-    void simulate_trades();
+    double simulate_trades();
     void write_daily_flow(string date, double cashflow);
     void write_orders(string date, string action, string quantity, double price);
-    double calculate_ewm(int k, vector<double> &base, int idx);
+    double calculate_ewm(int k, double prev, double curr);
 
 public:
-    adx(string start, string end, double x_, int n_, double threshhold);
-    void run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
+    adx(string start, string end, int x_, int n_, double threshhold);
+    double run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
 };

@@ -1,6 +1,6 @@
 #include "dma.h"
 
-dma::dma(string start, string end, int n_, double x_, int p_)
+dma::dma(string start, string end, int n_, int x_, int p_)
 {
     start_date = start;
     end_date = end;
@@ -11,7 +11,7 @@ dma::dma(string start, string end, int n_, double x_, int p_)
 
 void dma::write_daily_flow(string date, double cashflow)
 {
-    string to_write = date + " " + to_string(cashflow) + "\n";
+    string to_write = date + "," + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
@@ -42,7 +42,7 @@ void dma::calculate_dma()
     }
 }
 
-void dma::simulate_trades()
+double dma::simulate_trades()
 {
     int sim_period = dmaverage.size();
 
@@ -75,9 +75,11 @@ void dma::simulate_trades()
     double square_off = position * prices.back();
     string p_and_l = to_string(square_off + cashflow);
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
+
+    return square_off + cashflow;
 }
 
-void dma::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+double dma::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
 {
     ifstream file(infile);
     cashfile.open(cashflow_file);
@@ -111,10 +113,12 @@ void dma::run(string infile, string cashflow_file, string order_stats_file, stri
 
     calculate_dma();
 
-    simulate_trades();
+    double pl = simulate_trades();
 
     file.close();
     statfile.close();
     cashfile.close();
     pandlfile.close();
+
+    return pl;
 }

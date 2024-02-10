@@ -13,7 +13,7 @@
 //     double x;
 //     double p;
 //     void read_file(string train_file,MatrixXd &X,VectorXd &Y);
-    void read_test_file(string test_file);
+    // void read_test_file(string test_file);
 //     double compute_cost(string line);
 //     void gradient_descent();
 //     void simulate_trade(string cashflow_file, string order_stats_file, string pandl_file);
