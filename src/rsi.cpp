@@ -1,6 +1,6 @@
 #include "rsi.h"
 
-rsi::rsi(string start, string end, int n_, int x_, double oversold, double overbought, string cashflow_file, string order_stats_file, string pandl_file): strategy(start, end, x_, n_,cashflow_file, order_stats_file, pandl_file)
+rsi::rsi(string start, string end,  int x_, int n_, double oversold, double overbought, string cashflow_file, string order_stats_file, string pandl_file): strategy(start, end, x_, n_,cashflow_file, order_stats_file, pandl_file)
 {
     oversold_threshold = oversold;
     overbought_threshold = overbought;
@@ -68,8 +68,8 @@ double rsi::simulate_trades()
         write_daily_flow(today, cashflow);
     }
 
-    double square_off = position * entries[sim_period + n - 1].close;
-    string p_and_l = to_string(square_off + cashflow);
+    double square_off = position * entries.back().close;
+  
     write_pandl(square_off + cashflow);
 
     return square_off + cashflow;

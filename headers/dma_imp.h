@@ -1,26 +1,14 @@
-#include <bits/stdc++.h>
-using namespace std;
+#include "strategy.h"
 
-class dma_imp
+class dma_imp: public strategy
 {
 private:
-    string start_date;
-    string end_date;
-    int n;
-    int x;
     int p;
     int max_hold_days;
     double c1;
     double c2;
     vector<double> sf = {0};
     vector<double> ama = {0};
-    ofstream cashfile;
-    ofstream statfile;
-    ofstream pandlfile;
-    vector<string> dates = {""};
-    vector<double> prices = {0};
-    int position = 0;
-    double cashflow = 0;
 
     double sf0 = 0.5;
     deque<int> bought_date;
@@ -28,10 +16,8 @@ private:
 
     void calculate_ama();
     double simulate_trades();
-    void write_daily_flow(string date, double cashflow);
-    void write_orders(string date, string action, string quantity, double price);
 
 public:
-    dma_imp(string start, string end, int n_, int x_, int p_, int max_hold, double c1_, double c2_);
-    double run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
+    dma_imp(string start, string end, int n_, int x_, int p_, int max_hold, double c1_, double c2_, string cashflow_file, string order_stats_file, string pandl_file);
+    double predict(string filename) override;
 };

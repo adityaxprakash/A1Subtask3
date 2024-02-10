@@ -2,9 +2,8 @@
 
 macd::macd(string start, string end, int x_, string cashflow_file, string order_stats_file, string pandl_file, int n_) : strategy(start, end, x_, n_, cashflow_file, order_stats_file, pandl_file)
 {
-        // n = n_;
+    // n = n_;
 }
-
 
 void macd::calculate_macd()
 {
@@ -35,7 +34,7 @@ double macd::simulate_trades()
     {
         double curr_signal = signal_line[i];
         double curr_macd = macd_arr[i];
-        double curr_price = entries[i ].close;
+        double curr_price = entries[i].close;
         // cout<<curr_signal<<" "<<curr_macd<<" "<<curr_price<<endl;
         string today = entries[i].date;
 
@@ -55,8 +54,8 @@ double macd::simulate_trades()
         write_daily_flow(today, cashflow);
     }
 
-    double square_off = position * entries[sim_period - 1].close;
-    string p_and_l = to_string(square_off + cashflow);
+    double square_off = position * entries.back().close;
+
     write_pandl(square_off + cashflow);
 
     return square_off + cashflow;
@@ -64,7 +63,7 @@ double macd::simulate_trades()
 
 double macd::predict(string filename)
 {
-    for(auto entry: parser.parse_csv(filename))
+    for (auto entry : parser.parse_csv(filename))
     {
         entries.push_back(entry);
     }

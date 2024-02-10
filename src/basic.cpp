@@ -54,8 +54,7 @@ double basic::simulate_trades()
         }
         write_daily_flow(today, cashflow);
     }
-    double square_off = position * entries[num_days - 1].close;
-    string p_and_l = to_string(square_off + cashflow);
+    double square_off = position * entries.back().close;
     write_pandl(square_off + cashflow);
 
     return square_off + cashflow;
@@ -63,7 +62,7 @@ double basic::simulate_trades()
 
 double basic::predict(string filename)
 {
-    for(auto entry:parser.parse_csv(filename))
+    for (auto entry : parser.parse_csv(filename))
     {
         entries.push_back(entry);
     }

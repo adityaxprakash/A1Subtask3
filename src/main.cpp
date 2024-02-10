@@ -20,8 +20,8 @@ void get_stock_data(string symbol, int n, string start_date, string end_date, st
 
 }
 
-void parallel(string start_date, string end_date,  string cashflow_name, string order_name, string pandl_name, string symbol)
-{
+// void parallel(string start_date, string end_date,  string cashflow_name, string order_name, string pandl_name, string symbol)
+// {
     // int x=5;
     // vector<double> results(6,0);
     // #pragma omp parallel
@@ -79,7 +79,7 @@ void parallel(string start_date, string end_date,  string cashflow_name, string 
     // cout << "RSI: " << results[3] << "\n";
     // cout << "MACD: " << results[4] << "\n";
     // cout << "ADX: " << results[5] << "\n";
-}
+// }
 
 int main(int argc, char *argv[])
 {
@@ -127,12 +127,12 @@ int main(int argc, char *argv[])
     }
     else if (strat == "DMA++")
     {
-        dma_imp tool(start_date, end_date, n, x, p, max_hold, c1, c2);
-        tool.run(infile_name, cashflow_name, order_name, pandl_name);
+        dma_imp tool(start_date, end_date, n, x, p, max_hold, c1, c2, cashflow_name, order_name, pandl_name);
+        tool.predict(infile_name);
     }
     else if (strat == "RSI")
     {
-        rsi tool(start_date, end_date, n, x, oversold, overbought, cashflow_name, order_name, pandl_name);
+        rsi tool(start_date, end_date, x,  n,oversold, overbought, cashflow_name, order_name, pandl_name);
         tool.predict(infile_name);
     }
     else if(strat=="MACD")
@@ -142,17 +142,17 @@ int main(int argc, char *argv[])
     }
     else if(strat=="ADX")
     {
-        adx tool(start_date,end_date, x, n, adx_thresh);
-        tool.run(infile_name, cashflow_name, order_name, pandl_name);
+        adx tool(start_date,end_date, x, n, adx_thresh, cashflow_name, order_name, pandl_name);
+        tool.predict(infile_name);
     }
     else if(strat=="BASIC")
     {
         basic tool(start_date,end_date, x, n, cashflow_name, order_name, pandl_name);
-        cout<<tool.predict(infile_name)<<endl;
+        tool.predict(infile_name);
     }
     else if(strat=="BEST_OF_ALL")
     {
-        parallel(start_date,end_date,cashflow_name, order_name, pandl_name, symbol);
+        // parallel(start_date,end_date,cashflow_name, order_name, pandl_name, symbol);
     }
     else if(strat=="LINEAR_REGRESSION")
     {

@@ -17,7 +17,7 @@ void dma::calculate_dma()
         square_sum[i] = square_sum[i - 1] + (entries[i].close * entries[i].close);
     }
 
-    for (int i = n+1; i < num_days; i++)
+    for (int i = n + 1; i < num_days; i++)
     {
         double curr_avg = (sum[i] - sum[i - n]) / n;
         double curr_sd = sqrt(((square_sum[i] - square_sum[i - n]) / n) - (curr_avg * curr_avg));
@@ -37,15 +37,15 @@ double dma::simulate_trades()
         double curr_price = entries[i + n].close;
         string today = entries[i + n].date;
         // cout<<curr_price<<" "<<curr_dma<<" "<<curr_sd<<endl;
-        if (curr_price - curr_dma >= p * curr_sd && position<x)
+        if (curr_price - curr_dma >= p * curr_sd && position < x)
         {
             cashflow -= curr_price;
             position++;
             write_orders(today, "BUY", "1", curr_price);
         }
-        else if (curr_dma - curr_price >= p * curr_sd && position>-x)
+        else if (curr_dma - curr_price >= p * curr_sd && position > -x)
         {
-            if (position==-x)
+            if (position == -x)
             {
                 continue;
             }
@@ -56,8 +56,8 @@ double dma::simulate_trades()
         write_daily_flow(today, cashflow);
     }
 
-    double square_off = position * entries[sim_period+n-1].close;
-    string p_and_l = to_string(square_off + cashflow);
+    double square_off = position * entries.back().close;
+
     write_pandl(square_off + cashflow);
 
     return square_off + cashflow;
@@ -65,7 +65,7 @@ double dma::simulate_trades()
 
 double dma::predict(string filename)
 {
-    for(auto entry:parser.parse_csv(filename))
+    for (auto entry : parser.parse_csv(filename))
     {
         entries.push_back(entry);
     }

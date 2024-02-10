@@ -7,13 +7,7 @@ import sys
 def write_stock_data(symbol_name, start_date, end_date, n, output_file,strategy):
     start_date = datetime.strptime(start_date, "%d/%m/%Y")
     end_date = datetime.strptime(end_date, "%d/%m/%Y")
-    if strategy=="LINEAR_REGRESSION":
-        columns=['DATE','HIGH','LOW','VWAP','NO OF TRADES','CLOSE','OPEN']
-    elif strategy=="ADX":
-        columns=['DATE','CLOSE','HIGH','LOW','PREV. CLOSE']
-    else:
-        columns=['DATE','CLOSE']
-
+    columns=['DATE','CLOSE','OPEN','HIGH','LOW','NO OF TRADES','PREV. CLOSE','VWAP']
     df = get_stock_data(symbol_name, start_date, end_date, n,columns)
     df.to_csv(output_file,index=False)
 

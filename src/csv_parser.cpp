@@ -18,20 +18,28 @@ vector<date_entry> csv_parser::parse_csv(string filename)
         string token;
         getline(ss, token, ',');
         temp.date = token;
+
         getline(ss, token, ',');
         temp.close = stod(token);
+
         getline(ss, token, ',');
         temp.open = stod(token);
+
         getline(ss, token, ',');
         temp.high = stod(token);
+
         getline(ss, token, ',');
         temp.low = stod(token);
+
         getline(ss, token, ',');
         temp.trades = stod(token);
+
         getline(ss, token, ',');
         temp.prev_close = stod(token);
+
         getline(ss, token, ',');
         temp.vwap = stod(token);
+        
         entries.push_back(temp);
     }
     return entries;
