@@ -35,8 +35,8 @@ void dma::calculate_dma()
 
     for (int i = n+1; i < num_days; i++)
     {
-        double curr_avg = (sum[i-1] - sum[i - n-1]) / n;
-        double curr_sd = sqrt(((square_sum[i-1] - square_sum[i - n-1]) / n) - (curr_avg * curr_avg));
+        double curr_avg = (sum[i] - sum[i - n]) / n;
+        double curr_sd = sqrt(((square_sum[i] - square_sum[i - n]) / n) - (curr_avg * curr_avg));
         dmaverage.push_back(curr_avg);
         sd.push_back(curr_sd);
     }
@@ -52,7 +52,7 @@ double dma::simulate_trades()
         double curr_sd = sd[i];
         double curr_price = prices[i + n];
         string today = dates[i + n];
-
+        // cout<<curr_price<<" "<<curr_dma<<" "<<curr_sd<<endl;
         if (curr_price - curr_dma >= p * curr_sd && position<x)
         {
             cashflow -= curr_price;

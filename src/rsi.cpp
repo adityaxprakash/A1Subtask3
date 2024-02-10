@@ -67,13 +67,13 @@ double rsi::simulate_trades()
             continue;
         }
 
-        if (curr_rsi >= overbought_threshold && position < x)
+        if (curr_rsi <= oversold_threshold && position <x)
         {
             cashflow -= curr_price;
             position++;
             write_orders(today, "BUY", "1", curr_price);
         }
-        else if (curr_rsi <= oversold_threshold && position > -x)
+        else if (curr_rsi >= overbought_threshold && position >-x)
         {
             cashflow += curr_price;
             position--;
