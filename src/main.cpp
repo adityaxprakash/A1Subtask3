@@ -7,6 +7,9 @@
 #include "lr.h"
 // #include <omp.h>
 
+string cashflow_name = "data/daily_cashflow.csv";
+string order_name = "data/order_statistics.csv";
+string pandl_name = "data/final_pnl.txt";
 
 void get_stock_data(string symbol, int n, string start_date, string end_date, string filename)
 {
@@ -14,66 +17,117 @@ void get_stock_data(string symbol, int n, string start_date, string end_date, st
     system(command.c_str());
 }
 
-// void parallel(string start_date, string end_date,  string cashflow_name, string order_name, string pandl_name, string symbol)
-// {
-// int x=5;
-// vector<double> results(6,0);
-// #pragma omp parallel
-// {
-//     #pragma omp single
-//     {
-//         #pragma omp task
-//         {
-//             string infile_name = get_stock_data(symbol, 7, start_date, end_date,"BASIC");
-//             basic t1(start_date, end_date, 5, 7);
-//             results[0] = t1.run(infile_name, cashflow_name, order_name, pandl_name);
-//         }
+void parallel(string start_date, string end_date,  string cashflow_name, string order_name, string pandl_name, string symbol)
+{
+    int x=5;
+    vector<double> results(6,0);
+    vector<string> names = {"basic", "dma", "dma_imp", "rsi", "macd", "adx"};
+    double max_profit= -1e10;
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+            string infile_name = "data/"+names[0]+".csv";
+            get_stock_data(symbol, 7, start_date, end_date, infile_name);
+            basic t1(start_date, end_date, x, 7, cashflow_name, order_name, pandl_name);
+            results[0] = t1.predict(infile_name);
+            max_profit = max(max_profit, results[0]);
+        }
 
-//         #pragma omp task
-//         {
-//             string infile_name = get_stock_data(symbol, 50, start_date, end_date,"DMA");
-//             dma t2(start_date, end_date, 50, x, 2);
-//             results[1] = t2.run(infile_name, cashflow_name, order_name, pandl_name);
-//         }
+        #pragma omp section
+        {
+            string infile_name = "data/"+names[1]+".csv";
+            get_stock_data(symbol, 50, start_date, end_date,infile_name);
+            dma t2(start_date, end_date, x,50, 2, cashflow_name, order_name, pandl_name);
+            results[1] = t2.predict(infile_name);
+            max_profit = max(max_profit, results[1]);
+        }
 
-//         #pragma omp task
-//         {
-//             string infile_name = get_stock_data(symbol, 14, start_date, end_date,"DMA++");
-//             dma_imp t3(start_date, end_date, 14, x, 5, 28, 2, 0.2);
-//             results[2] = t3.run(infile_name, cashflow_name, order_name, pandl_name);
-//         }
-//         #pragma omp task
-//         {
-//             string infile_name = get_stock_data(symbol, 14, start_date, end_date,"RSI");
+        #pragma omp section
+        {
+            string infile_name = "data/"+names[2]+".csv";
+            get_stock_data(symbol, 14, start_date, end_date,infile_name);
+            dma_imp t3(start_date, end_date, x,14, 5, 28, 2, 0.2, cashflow_name, order_name, pandl_name);
+            results[2] = t3.predict(infile_name);
+            max_profit = max(max_profit, results[2]);
+        }
+        #pragma omp section
+        {
+            string infile_name = "data/"+names[3]+".csv";
+            get_stock_data(symbol, 14, start_date, end_date,infile_name);
+            rsi t4(start_date, end_date, x,14, 30, 70, cashflow_name, order_name, pandl_name);
+            results[3] = t4.predict(infile_name);
+            max_profit = max(max_profit, results[3]);
+        }
 
-//             rsi t4(start_date, end_date, 14, x, 30, 70);
-//             results[3] = t4.run(infile_name, cashflow_name, order_name, pandl_name);
-//         }
+        #pragma omp section
+        {
+            string infile_name = "data/"+names[4]+".csv";
+            get_stock_data(symbol, 0, start_date, end_date,infile_name);
+            macd t5(start_date, end_date, x, cashflow_name, order_name, pandl_name);
+            results[4] = t5.predict(infile_name);
+            max_profit = max(max_profit, results[4]);
+        }
 
-//         #pragma omp task
-//         {
-//             string infile_name = get_stock_data(symbol, 0, start_date, end_date,"MACD");
-
-//             macd t5(start_date, end_date, x);
-//             results[4] = t5.run(infile_name, cashflow_name, order_name, pandl_name);
-//         }
-
-//         #pragma omp task
-//         {
-//             string infile_name = get_stock_data(symbol, 14, start_date, end_date,"ADX");
-//             adx t6(start_date, end_date, x, 14, 25);
-//             results[5] = t6.run(infile_name, cashflow_name, order_name, pandl_name);
-//         }
-//     }
-// }
-// cout << "Results: \n";
-// cout << "Basic: " << results[0] << "\n";
-// cout << "DMA: " << results[1] << "\n";
-// cout << "DMA++: " << results[2] << "\n";
-// cout << "RSI: " << results[3] << "\n";
-// cout << "MACD: " << results[4] << "\n";
-// cout << "ADX: " << results[5] << "\n";
-// }
+        #pragma omp section
+        {
+            string infile_name = "data/"+names[5]+".csv";
+            get_stock_data(symbol, 14, start_date, end_date,infile_name);
+            adx t6(start_date, end_date, x, 14, 25, cashflow_name, order_name, pandl_name);
+            results[5] = t6.predict(infile_name);
+            max_profit = max(max_profit, results[5]);
+        }
+    }
+    std::cout << "Results: \n";
+    std::cout << "Basic: " << results[0] << "\n";
+    std::cout << "DMA: " << results[1] << "\n";
+    std::cout << "DMA++: " << results[2] << "\n";
+    std::cout << "RSI: " << results[3] << "\n";
+    std::cout << "MACD: " << results[4] << "\n";
+    std::cout << "ADX: " << results[5] << "\n";
+    if(max_profit==results[0])
+    {
+        string infile_name = "data/"+symbol+".csv";
+        get_stock_data(symbol, 7, start_date, end_date, infile_name);
+        basic t1(start_date, end_date, x, 7, cashflow_name, order_name, pandl_name);
+        t1.predict(infile_name);
+    }
+    else if(max_profit==results[1])
+    {
+        string infile_name = "data/"+symbol+".csv";
+        get_stock_data(symbol, 50, start_date, end_date, infile_name);
+        dma t2(start_date, end_date, x,50, 2, cashflow_name, order_name, pandl_name);
+        t2.predict(infile_name);
+    }
+    else if(max_profit==results[2])
+    {
+        string infile_name = "data/"+symbol+".csv";
+        get_stock_data(symbol, 14, start_date, end_date, infile_name);
+        dma_imp t3(start_date, end_date, x,14, 5, 28, 2, 0.2, cashflow_name, order_name, pandl_name);
+        t3.predict(infile_name);
+    }
+    else if(max_profit==results[3])
+    {
+        string infile_name = "data/"+symbol+".csv";
+        get_stock_data(symbol, 14, start_date, end_date, infile_name);
+        rsi t4(start_date, end_date, x,14, 30, 70, cashflow_name, order_name, pandl_name);
+        t4.predict(infile_name);
+    }
+    else if(max_profit==results[4])
+    {
+        string infile_name = "data/"+symbol+".csv";
+        get_stock_data(symbol, 0, start_date, end_date, infile_name);
+        macd t5(start_date, end_date, x, cashflow_name, order_name, pandl_name);
+        t5.predict(infile_name);
+    }
+    else if(max_profit==results[5])
+    {
+        string infile_name = "data/"+symbol+".csv";
+        get_stock_data(symbol, 14, start_date, end_date, infile_name);
+        adx t6(start_date, end_date, x, 14, 25, cashflow_name, order_name, pandl_name);
+        t6.predict(infile_name);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -93,10 +147,8 @@ int main(int argc, char *argv[])
     string train_start = argv[14];
     string train_end = argv[15];
 
-    string cashflow_name = "data/daily_cashflow.csv";
-    string order_name = "data/order_statistics.csv";
-    string pandl_name = "data/final_pnl.txt";
-    string infile_name = "data/" + symbol + ".csv";
+   
+    string infile_name = "data/"+symbol+ ".csv";
 
     if (strat == "LINEAR_REGRESSION")
     {
@@ -124,7 +176,7 @@ int main(int argc, char *argv[])
     }
     else if (strat == "DMA++")
     {
-        dma_imp tool(start_date, end_date, n, x, p, max_hold, c1, c2, cashflow_name, order_name, pandl_name);
+        dma_imp tool(start_date, end_date, x,n, p, max_hold, c1, c2, cashflow_name, order_name, pandl_name);
         tool.predict(infile_name);
     }
     else if (strat == "MACD")
@@ -144,10 +196,10 @@ int main(int argc, char *argv[])
     }
     else if (strat == "BEST_OF_ALL")
     {
-        // parallel(start_date,end_date,cashflow_name, order_name, pandl_name, symbol);
+        parallel(start_date,end_date,cashflow_name, order_name, pandl_name, symbol);
     }
     else
     {
-        cout << "Invalid strategy\n";
+        std::cout << "Invalid strategy\n";
     }
 }

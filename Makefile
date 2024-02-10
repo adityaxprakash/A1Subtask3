@@ -1,6 +1,6 @@
 # Define the compiler and flags
 CXX = g++
-CXXFLAGS = -g -Wall -Wextra -std=c++11 
+CXXFLAGS = -g -std=c++11 -fopenmp
 
 # Define the sources directory
 SRCDIR = src
@@ -30,23 +30,30 @@ $(EXECUTABLE): $(OBJECTS)
 	@$(CXX) $(CXXFLAGS) $^ -o $@
 
 # Rule to compile each source file into an object file
-$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp | $(BUILDDIR)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp compile_msg  | $(BUILDDIR) 
 	@$(CXX) $(CXXFLAGS) -I $(HEADERDIR) -c $< -o $@
+
+compile_msg:
+	@echo "Compiling source code..."	
 
 # Create the build directory if it doesn't exist
 $(BUILDDIR):
 	@mkdir -p $(BUILDDIR)
+	
 
 # Clean rule
 clean:
 	@rm -rf $(BUILDDIR)/* $(EXECUTABLE) $(DATADIR)/*
+	@echo "Cleaned build and data directories"
 
 # Phony target to prevent conflicts with files named 'clean' or 'all'
-.PHONY: clean all run
+.PHONY: clean all run compile_msg
 
 # Additional target to run the program with command-line arguments
 run:
+	@echo "Running the predictor"
 	@ ./$(EXECUTABLE) $(strategy) $(symbol) $(n) $(x) "$(start_date)" "$(end_date)" $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold) $(train_start_date) $(train_end_date) 
+	@echo "Results written to data directory"
 
 strategy ?= DEFAULT_STRATEGY
 symbol ?= DEFAULT_SYMBOL
