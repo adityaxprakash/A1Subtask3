@@ -42,16 +42,27 @@ void mrp::write_daily_flow(string date, double cashflow)
     cashfile << to_write;
 }
 
-void mrp::write_orders(string date, string action, string quantity, double price, string stock)
+// void mrp::write_orders(string date, string action, string quantity, double price, string stock)
+// {
+//     string to_write = date + "," + action + "," + stock + "," + quantity + "," + to_string(price) + "\n";
+//     statfile << to_write;
+// }
+void mrp::write_orders_1(string date, string action, string quantity, double price, string stock)
 {
     string to_write = date + "," + action + "," + stock + "," + quantity + "," + to_string(price) + "\n";
-    statfile << to_write;
+    statfile1 << to_write;
+}
+void mrp::write_orders_2(string date, string action, string quantity, double price, string stock)
+{
+    string to_write = date + "," + action + "," + stock + "," + quantity + "," + to_string(price) + "\n";
+    statfile2 << to_write;
 }
 
-void mrp::simulate_trades(string cashflow_file, string order_stats_file, string pandl_file)
+void mrp::simulate_trades(string cashflow_file, string order_stats_file1,string order_stats_file2, string pandl_file)
 {
     cashfile.open(cashflow_file);
-    statfile.open(order_stats_file);
+    statfile1.open(order_stats_file1);
+    statfile2.open(order_stats_file2);
     pandlfile.open(pandl_file);
     for (int i = 1; i <= spread.size(); i++)
     {
@@ -64,25 +75,26 @@ void mrp::simulate_trades(string cashflow_file, string order_stats_file, string 
         {
             position--;
             cashflow += spread[i];
-            write_orders(dates[i], "SELL", to_string(1), stock1_prices[i], stock1);
-            write_orders(dates[i], "BUY", to_string(1), stock2_prices[i], stock2);
+            write_orders_1(dates[i], "SELL", to_string(1), stock1_prices[i], stock1);
+            write_orders_2(dates[i], "BUY", to_string(1), stock2_prices[i], stock2);
             
         }
         else if (curr_z_score < -mrp_threshold && position < x)
         {
             position++;
             cashflow -= spread[i];
-            write_orders(dates[i], "BUY", to_string(1), stock1_prices[i], stock1);
-            write_orders(dates[i], "SELL", to_string(1), stock2_prices[i], stock2);
+            write_orders_1(dates[i], "BUY", to_string(1), stock1_prices[i], stock1);
+            write_orders_2(dates[i], "SELL", to_string(1), stock2_prices[i], stock2);
         }
         write_daily_flow(dates[i], cashflow);
     }
     cashfile.close();
-    statfile.close();
+    statfile1.close();
+    statfile2.close();
     pandlfile.close();
 }
 
-void mrp::run(string infile1, string infile2, string cashflow_file, string order_stats_file, string pandl_file)
+void mrp::run(string infile1, string infile2, string cashflow_file, string order_stats_file1, string order_stats_file2, string pandl_file)
 {
     ifstream file1(infile1);
     ifstream file2(infile2);
@@ -104,7 +116,7 @@ void mrp::run(string infile1, string infile2, string cashflow_file, string order
             }
             stock1_prices.push_back(price1);
             dates.push_back(date);
-        }
+        }   
     }
     line_number = 0;
     while (getline(file2, line))
@@ -121,5 +133,5 @@ void mrp::run(string infile1, string infile2, string cashflow_file, string order
         }
     }
     calculate_mrp();
-    simulate_trades(cashflow_file, order_stats_file, pandl_file);
+    simulate_trades(cashflow_file, order_stats_file1,order_stats_file2, pandl_file);
 }

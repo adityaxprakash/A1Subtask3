@@ -14,7 +14,8 @@ class mrp{
         vector<double> adx_arr={0};
 
         ofstream cashfile;
-        ofstream statfile;
+        ofstream statfile1;
+        ofstream statfile2;
         ofstream pandlfile;
 
         vector<string> dates = {""};
@@ -30,11 +31,13 @@ class mrp{
         double cashflow = 0;
 
         void calculate_mrp();
-        void simulate_trades(string cashflow_file, string order_stats_file, string pandl_file);
+        void simulate_trades(string cashflow_file, string order_stats_file1,string order_stats_file2, string pandl_file);
         void write_daily_flow(string date, double cashflow);
         void write_orders(string date, string action, string quantity, double price,string stock);
+        void write_orders_1(string date, string action, string quantity, double price, string stock);
+        void write_orders_2(string date, string action, string quantity, double price, string stock);
         
     public:
         mrp(string start, string end, double x_, int n_, double ,string stock1_,string stock2_);
-        void run(string infile1,string infile2, string cashflow_file, string order_stats_file, string pandl_file);    
+        void run(string infile1,string infile2, string cashflow_file, string order_stats_file, string oder_stats2_file,string pandl_file);    
 };
