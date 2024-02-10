@@ -1,33 +1,18 @@
-#include <bits/stdc++.h>
-using namespace std;
+#include "strategy.h"
 
-class macd
+class macd: public strategy
 {
 private:
-    string start_date;
-    string end_date;
     int long_n=26;
     int short_n=12;
     int macd_n=9;
-    // int n;
-    int x;
     vector<double> signal_line={0};
     vector<double> macd_arr={0};
 
-    ofstream cashfile;
-    ofstream statfile;
-    ofstream pandlfile;
-    vector<string> dates = {""};
-    vector<double> prices = {0};
-    int position = 0;
-    double cashflow = 0;
-
     void calculate_macd();
     double simulate_trades();
-    void write_daily_flow(string date, double cashflow);
-    void write_orders(string date, string action, string quantity, double price);
 
 public:
-    macd(string start, string end, int x_);
-    double run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
+    macd(string start, string end, int x_, string cashflow_file, string order_stats_file, string pandl_file, int n_=0);
+    double predict(string filename) override;
 };

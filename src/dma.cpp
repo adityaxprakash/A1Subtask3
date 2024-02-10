@@ -1,36 +1,20 @@
 #include "dma.h"
 
-dma::dma(string start, string end, int n_, int x_, int p_)
+dma::dma(string start, string end, int x_, int n_, int p_, string cashflow_file, string order_stats_file, string pandl_file) : strategy(start, end, x_, n_, cashflow_file, order_stats_file, pandl_file)
 {
-    start_date = start;
-    end_date = end;
-    n = n_;
-    x = x_;
     p = p_;
-}
-
-void dma::write_daily_flow(string date, double cashflow)
-{
-    string to_write = date + "," + to_string(cashflow) + "\n";
-    cashfile << to_write;
-}
-
-void dma::write_orders(string date, string action, string quantity, double price)
-{
-    string to_write = date + "," + action + "," + quantity + "," + to_string(price) + "\n";
-    statfile << to_write;
 }
 
 void dma::calculate_dma()
 {
-    int num_days = prices.size();
+    int num_days = entries.size();
     vector<double> sum(num_days, 0);
     vector<double> square_sum(num_days, 0);
 
     for (int i = 1; i < num_days; i++)
     {
-        sum[i] = sum[i - 1] + prices[i];
-        square_sum[i] = square_sum[i - 1] + (prices[i] * prices[i]);
+        sum[i] = sum[i - 1] + entries[i].close;
+        square_sum[i] = square_sum[i - 1] + (entries[i].close * entries[i].close);
     }
 
     for (int i = n+1; i < num_days; i++)
@@ -50,8 +34,8 @@ double dma::simulate_trades()
     {
         double curr_dma = dmaverage[i];
         double curr_sd = sd[i];
-        double curr_price = prices[i + n];
-        string today = dates[i + n];
+        double curr_price = entries[i + n].close;
+        string today = entries[i + n].date;
         // cout<<curr_price<<" "<<curr_dma<<" "<<curr_sd<<endl;
         if (curr_price - curr_dma >= p * curr_sd && position<x)
         {
@@ -72,53 +56,19 @@ double dma::simulate_trades()
         write_daily_flow(today, cashflow);
     }
 
-    double square_off = position * prices.back();
+    double square_off = position * entries[sim_period+n-1].close;
     string p_and_l = to_string(square_off + cashflow);
-    pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
+    write_pandl(square_off + cashflow);
 
     return square_off + cashflow;
 }
 
-double dma::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+double dma::predict(string filename)
 {
-    ifstream file(infile);
-    cashfile.open(cashflow_file);
-    statfile.open(order_stats_file);
-    pandlfile.open(pandl_file);
-    cashfile << "Date,Cashflow\n";
-    statfile << "Date,Order_dir,Quantity,Price\n";
-
-    if (!file.is_open() || !statfile.is_open() || !cashfile.is_open() || !pandlfile.is_open())
+    for(auto entry:parser.parse_csv(filename))
     {
-        cout << "Error: couldn't open" << '\n';
+        entries.push_back(entry);
     }
-
-    int line_number = 0;
-    string line;
-    while (getline(file, line))
-    {
-        stringstream ss(line);
-        string date, price;
-        line_number++;
-        if (getline(ss, date, ',') && getline(ss, price, ','))
-        {
-            if (line_number == 1)
-            {
-                continue;
-            }
-            prices.push_back(stod(price));
-            dates.push_back(date);
-        }
-    }
-
     calculate_dma();
-
-    double pl = simulate_trades();
-
-    file.close();
-    statfile.close();
-    cashfile.close();
-    pandlfile.close();
-
-    return pl;
+    return simulate_trades();
 }

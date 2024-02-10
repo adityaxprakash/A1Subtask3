@@ -6,9 +6,10 @@
 #include "adx.h"
 #include "basic.h"
 #include "lr.h"
-#include <omp.h>
+// #include <omp.h>
 
 using namespace std;
+
 
 
 void get_stock_data(string symbol, int n, string start_date, string end_date, string strat, string filename)
@@ -121,8 +122,8 @@ int main(int argc, char *argv[])
     string infile_name = "data/"+symbol+".csv";
     if (strat == "DMA")
     {
-        dma tool(start_date, end_date, n, x, p);
-        tool.run(infile_name, cashflow_name, order_name, pandl_name);
+        dma tool(start_date, end_date,  x, n,p, cashflow_name, order_name, pandl_name);
+        tool.predict(infile_name);
     }
     else if (strat == "DMA++")
     {
@@ -131,13 +132,13 @@ int main(int argc, char *argv[])
     }
     else if (strat == "RSI")
     {
-        rsi tool(start_date, end_date, n, x, oversold, overbought);
-        tool.run(infile_name, cashflow_name, order_name, pandl_name);
+        rsi tool(start_date, end_date, n, x, oversold, overbought, cashflow_name, order_name, pandl_name);
+        tool.predict(infile_name);
     }
     else if(strat=="MACD")
     {
-        macd tool(start_date, end_date, x);
-        tool.run(infile_name, cashflow_name, order_name, pandl_name);
+        macd tool(start_date, end_date, x, cashflow_name,order_name,pandl_name);
+        tool.predict(infile_name);
     }
     else if(strat=="ADX")
     {
@@ -146,9 +147,8 @@ int main(int argc, char *argv[])
     }
     else if(strat=="BASIC")
     {
-        basic tool(start_date,end_date, x, n);
-        cout<<tool.run(infile_name, cashflow_name, order_name, pandl_name)<<endl;
-        
+        basic tool(start_date,end_date, x, n, cashflow_name, order_name, pandl_name);
+        cout<<tool.predict(infile_name)<<endl;
     }
     else if(strat=="BEST_OF_ALL")
     {
