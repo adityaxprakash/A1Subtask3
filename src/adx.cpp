@@ -1,6 +1,6 @@
 #include "adx.h"
 
-adx::adx(string start, string end, double x_, int n_, double threshhold)
+adx::adx(string start, string end, int x_, int n_, double threshhold)
 {
     start_date = start;
     end_date = end;
@@ -11,7 +11,7 @@ adx::adx(string start, string end, double x_, int n_, double threshhold)
 
 void adx::write_daily_flow(string date, double cashflow)
 {
-    string to_write = date + " " + to_string(cashflow) + "\n";
+    string to_write = date + "," + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
@@ -21,14 +21,10 @@ void adx::write_orders(string date, string action, string quantity, double price
     statfile << to_write;
 }
 
-double adx::calculate_ewm(int k, vector<double> &base, int idx)
+double adx::calculate_ewm(int k, double prev, double curr)
 {
-    double ewm = base[idx - k];
-    double alpha = 2 / (k + 1);
-    for (int i = k - 1; i >= 1; i--)
-    {
-        ewm = alpha * base[idx - i] + (1 - alpha) * ewm;
-    }
+    double alpha = 2.0 / (k + 1);
+    double ewm = curr * alpha + (1 - alpha) * prev;
     return ewm;
 }
 
@@ -38,6 +34,7 @@ void adx::calculate_adx()
     vector<double>true_range={0};
     vector<double>plus_dm={0};
     vector<double>minus_dm={0};
+    vector<double> atr={0};
     vector<double>plus_di={0};
     vector<double>minus_di={0};
     vector<double> plus_atr = {0};
@@ -47,21 +44,30 @@ void adx::calculate_adx()
     {
         true_range.push_back(max(high[i]-low[i],max(high[i]-prev_close[i],low[i]-prev_close[i])));
         plus_dm.push_back(max(0.0,high[i]-high[i-1]));
-        minus_dm.push_back(max(0.0,low[i]-low[i-1]));
+        minus_dm.push_back(max(0.0,low[i-1]-low[i]));
     }
-    for(int i=n+1;i<num_days;i++)
+    atr.push_back(true_range[n+1]);
+    // cout<<atr[1]<<" ";
+    plus_di.push_back(plus_dm[n+1]/atr[1]);
+    minus_di.push_back(minus_dm[n+1]/atr[1]);
+    // cout<<plus_di[1]<<" "<<minus_di[1]<<" ";
+    dx.push_back(100*(plus_di[1]-minus_di[1])/(plus_di[1]+minus_di[1]));
+    adx_arr.push_back(dx[1]);
+    // cout<<adx_arr[1]<<" "<<dx[1]<<endl;
+    for(int i=2;i<num_days-n;i++)
     {
-        double curr_atr=calculate_ewm(n,true_range,i);
-        plus_atr.push_back(plus_dm[i]/curr_atr);
-        minus_atr.push_back(minus_dm[i]/curr_atr);
-        plus_di.push_back(calculate_ewm(n,plus_atr,i));
-        minus_di.push_back(calculate_ewm(n,minus_atr,i));
+        double curr_atr=calculate_ewm(n,atr[i-1],true_range[i+n]);
+        // cout<<curr_atr<<endl;
+        atr.push_back(curr_atr);
+        plus_di.push_back(calculate_ewm(n,plus_di[i-1],plus_dm[i+n]/curr_atr));
+        minus_di.push_back(calculate_ewm(n,minus_di[i-1],minus_dm[i+n]/curr_atr));
         dx.push_back(100*(plus_di[i]-minus_di[i])/(plus_di[i]+minus_di[i]));
-        adx_arr.push_back(calculate_ewm(n,dx,i));
+        adx_arr.push_back(calculate_ewm(n,adx_arr[i-1],dx[i]));
+        // cout<<adx_arr[i]<<" "<<dx[i]<<endl;
     }
 }
 
-void adx::simulate_trades()
+double adx::simulate_trades()
 {
     int sim_period = adx_arr.size();
 
@@ -90,9 +96,10 @@ void adx::simulate_trades()
     double square_off = position * prices.back();
     string p_and_l = to_string(square_off + cashflow);
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
+    return square_off + cashflow;
 }
 
-void adx::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+double adx::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
 {
     ifstream file(infile);
     cashfile.open(cashflow_file);
@@ -129,10 +136,12 @@ void adx::run(string infile, string cashflow_file, string order_stats_file, stri
 
     calculate_adx();
 
-    simulate_trades();
+    double pl=simulate_trades();
 
     file.close();
     statfile.close();
     cashfile.close();
     pandlfile.close();
+
+    return pl;
 }

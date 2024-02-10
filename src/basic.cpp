@@ -1,6 +1,6 @@
 #include "../headers/basic.h"
 
-basic::basic(string start, string end, double x_, int n_)
+basic::basic(string start, string end, int x_, int n_)
 {
     this->start_date = start;
     this->end_date = end;
@@ -19,7 +19,7 @@ void basic::calculate_basic()
         {
             increases[i] = increases[i - 1] + 1;
         }
-        else 
+        else
         {
             increases[i] = increases[i - 1];
         }
@@ -36,7 +36,7 @@ void basic::calculate_basic()
 
 void basic::write_daily_flow(string date, double cashflow)
 {
-    string to_write = date + " " + to_string(cashflow) + "\n";
+    string to_write = date + "," + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
@@ -45,7 +45,7 @@ void basic::write_orders(string date, string action, string quantity, double pri
     string to_write = date + "," + action + "," + quantity + "," + to_string(price) + "\n";
     statfile << to_write;
 }
-void basic::simulate_trades()
+double basic::simulate_trades()
 {
     int num_days = increases.size();
 
@@ -75,9 +75,10 @@ void basic::simulate_trades()
     string p_and_l = to_string(square_off + cashflow);
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
     
+    return square_off + cashflow;
 }
 
-void basic::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+double basic::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
 {
     ifstream file(infile);
     cashfile.open(cashflow_file);
@@ -108,13 +109,14 @@ void basic::run(string infile, string cashflow_file, string order_stats_file, st
             dates.push_back(date);
         }
     }
-    // cout << "Read " << prices[10] << " prices" << '\n';
     calculate_basic();
 
-    simulate_trades();
+    double pl = simulate_trades();
+    
 
     file.close();
     statfile.close();
     cashfile.close();
     pandlfile.close();
+    return pl;
 }

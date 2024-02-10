@@ -7,7 +7,7 @@ private:
     string start_date;
     string end_date;
     int n;
-    double x;
+    int x;
     ofstream cashfile;
     ofstream statfile;
     ofstream pandlfile;
@@ -21,11 +21,11 @@ private:
     double cashflow = 0;
 
     void calculate_basic();
-    void simulate_trades();
+    double simulate_trades();
     void write_daily_flow(string date, double cashflow);
     void write_orders(string date, string action, string quantity, double price);
 
 public:
-    basic(string start, string end,  double x_, int n_);
-    void run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
+    basic(string start, string end,  int x_, int n_);
+    double run(string infile, string cashflow_file, string order_stats_file, string pandl_file);
 };

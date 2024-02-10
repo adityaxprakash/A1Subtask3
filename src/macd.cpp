@@ -1,16 +1,16 @@
 #include "macd.h"
 
-macd::macd(string start, string end, double x_, int n_)
+macd::macd(string start, string end, int x_)
 {
     start_date = start;
     end_date = end;
     x = x_;
-    n = n_;
+    // n = n_;
 }
 
 void macd::write_daily_flow(string date, double cashflow)
 {
-    string to_write = date + " " + to_string(cashflow) + "\n";
+    string to_write = date + "," + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
@@ -20,14 +20,10 @@ void macd::write_orders(string date, string action, string quantity, double pric
     statfile << to_write;
 }
 
-double calculate_ewm(int k, vector<double> &base, int idx)
+double calculate_ewm(int k, double prev, double curr)
 {
-    double ewm = base[idx - k];
-    double alpha = 2 / (k + 1);
-    for (int i = k - 1; i >= 1; i--)
-    {
-        ewm = alpha * base[idx - i] + (1 - alpha) * ewm;
-    }
+    double alpha = 2.0 / (k + 1);
+    double ewm = curr * alpha + (1 - alpha) * prev;
     return ewm;
 }
 
@@ -36,37 +32,41 @@ void macd::calculate_macd()
     int num_days = prices.size();
     vector<double> short_ewm(num_days, 0);
     vector<double> long_ewm(num_days, 0);
-    macd_arr.resize(num_days, 0);
-    for (int i = n + 1 - macd_n; i < num_days; i++)
+    short_ewm[1] = prices[1];
+    long_ewm[1] = prices[1];
+    macd_arr.push_back(0);
+    signal_line.push_back(0);
+    for (int i = 2; i < num_days; i++)
     {
-        short_ewm[i] = calculate_ewm(short_n, prices, i);
-        long_ewm[i] = calculate_ewm(long_n, prices, i);
-        macd_arr[i] = short_ewm[i] - long_ewm[i];
+        short_ewm[i] = calculate_ewm(short_n, short_ewm[i - 1], prices[i]);
+        long_ewm[i] = calculate_ewm(long_n, long_ewm[i - 1], prices[i]);
+        macd_arr.push_back(short_ewm[i] - long_ewm[i]);
     }
-    for (int i = n + 1; i < num_days; i++)
+    for (int i = 2; i < num_days; i++)
     {
-        signal_line.push_back(calculate_ewm(macd_n, macd_arr, i));
+        signal_line.push_back(calculate_ewm(macd_n, signal_line[i - 1], macd_arr[i]));
     }
 }
 
-void macd::simulate_trades()
+double macd::simulate_trades()
 {
     int sim_period = signal_line.size();
 
     for (int i = 1; i < sim_period; i++)
     {
         double curr_signal = signal_line[i];
-        double curr_macd = macd_arr[i+n];
-        double curr_price = prices[i + n];
-        string today = dates[i + n];
+        double curr_macd = macd_arr[i];
+        double curr_price = prices[i];
+        // cout<<curr_signal<<" "<<curr_macd<<" "<<curr_price<<endl;
+        string today = dates[i];
 
-        if (curr_macd > curr_signal && position<x)
+        if (curr_macd > curr_signal && position < x)
         {
             cashflow -= curr_price;
             position++;
             write_orders(today, "BUY", "1", curr_price);
         }
-        else if (curr_macd < curr_signal && position>-x)
+        else if (curr_macd < curr_signal && position > -x)
         {
             cashflow += curr_price;
             position--;
@@ -79,9 +79,11 @@ void macd::simulate_trades()
     double square_off = position * prices.back();
     string p_and_l = to_string(square_off + cashflow);
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
+
+    return square_off + cashflow;
 }
 
-void macd::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+double macd::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
 {
     ifstream file(infile);
     cashfile.open(cashflow_file);
@@ -115,10 +117,12 @@ void macd::run(string infile, string cashflow_file, string order_stats_file, str
 
     calculate_macd();
 
-    simulate_trades();
+    double pl = simulate_trades();
 
     file.close();
     statfile.close();
     cashfile.close();
     pandlfile.close();
+
+    return pl;
 }

@@ -1,6 +1,6 @@
 #include "rsi.h"
 
-rsi::rsi(string start, string end, int n_, double x_, double oversold, double overbought)
+rsi::rsi(string start, string end, int n_, int x_, double oversold, double overbought)
 {
     start_date = start;
     end_date = end;
@@ -12,7 +12,7 @@ rsi::rsi(string start, string end, int n_, double x_, double oversold, double ov
 
 void rsi::write_daily_flow(string date, double cashflow)
 {
-    string to_write = date + " " + to_string(cashflow) + "\n";
+    string to_write = date + "," + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
@@ -40,7 +40,7 @@ void rsi::calculate_gain_loss()
     }
 }
 
-void rsi::simulate_trades()
+double rsi::simulate_trades()
 {
     int sim_period = avg_gain.size();
 
@@ -86,9 +86,11 @@ void rsi::simulate_trades()
     double square_off = position * prices.back();
     string p_and_l = to_string(square_off + cashflow);
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
+
+    return square_off + cashflow;
 }
 
-void rsi::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+double rsi::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
 {
     ifstream file(infile);
     cashfile.open(cashflow_file);
@@ -122,10 +124,12 @@ void rsi::run(string infile, string cashflow_file, string order_stats_file, stri
 
     calculate_gain_loss();
 
-    simulate_trades();
+    double pl = simulate_trades();
 
     file.close();
     statfile.close();
     cashfile.close();
     pandlfile.close();
+
+    return pl;
 }

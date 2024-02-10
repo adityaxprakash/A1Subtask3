@@ -1,6 +1,6 @@
 #include "dma_imp.h"
 
-dma_imp::dma_imp(string start, string end, int n_, double x_, int p_, int max_hold, double c1_, double c2_)
+dma_imp::dma_imp(string start, string end, int n_, int x_, int p_, int max_hold, double c1_, double c2_)
 {
     start_date = start;
     end_date = end;
@@ -14,7 +14,7 @@ dma_imp::dma_imp(string start, string end, int n_, double x_, int p_, int max_ho
 
 void dma_imp::write_daily_flow(string date, double cashflow)
 {
-    string to_write = date + " " + to_string(cashflow) + "\n";
+    string to_write = date + "," + to_string(cashflow) + "\n";
     cashfile << to_write;
 }
 
@@ -28,32 +28,34 @@ void dma_imp::calculate_ama()
 {
     int num_days = prices.size();
     vector<double> change_in_prices(num_days, 0);
-    sf.resize(num_days-n, 0);
-    ama.resize(num_days-n, 0);
-    
+    sf.resize(num_days - n, 0);
+    ama.resize(num_days - n, 0);
+
     for (int i = 1; i < num_days; i++)
     {
-        change_in_prices[i] = change_in_prices[i - 1] + (prices[i] - prices[i - 1]);
+        change_in_prices[i] = change_in_prices[i - 1] + abs(prices[i] - prices[i - 1]);
     }
 
     sf[1] = sf0;
     ama[1] = prices[n + 1];
 
-    for (int i = 2; i < num_days-n; i++)
+    for (int i = 2; i < num_days - n; i++)
     {
-        double denom = change_in_prices[i+n] - change_in_prices[i];
+        double denom = change_in_prices[i + n] - change_in_prices[i];
         if (denom == 0)
         {
             sf[i] = sf[i - 1];
         }
-        double er = abs(prices[i+n] - prices[i]) / denom;
+        double er = (prices[i + n] - prices[i]) / denom;
         double aux = (2 * er) / (1 + c2);
+
         sf[i] = sf[i - 1] + c1 * (((aux - 1) / (aux + 1)) - sf[i - 1]);
-        ama[i] = ama[i - 1] + sf[i] * (prices[i+n] - ama[i - 1]);
+        // cout<<sf[i]<<endl;
+        ama[i] = ama[i - 1] + sf[i] * (prices[i + n] - ama[i - 1]);
     }
 }
 
-void dma_imp::simulate_trades()
+double dma_imp::simulate_trades()
 {
     int sim_period = ama.size();
 
@@ -63,6 +65,7 @@ void dma_imp::simulate_trades()
         double change = p / 100.0;
         double curr_price = prices[i + n];
         string today = dates[i + n];
+        // cout<<today<<" "<<curr_price<<" "<<curr_ama<<endl;
         int last_bought = i;
         if (!bought_date.empty())
         {
@@ -155,9 +158,10 @@ void dma_imp::simulate_trades()
     double square_off = position * prices.back();
     string p_and_l = to_string(square_off + cashflow);
     pandlfile << "Final Profit/Loss: " + p_and_l + "\n";
+    return square_off + cashflow;
 }
 
-void dma_imp::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
+double dma_imp::run(string infile, string cashflow_file, string order_stats_file, string pandl_file)
 {
     ifstream file(infile);
     cashfile.open(cashflow_file);
@@ -191,10 +195,12 @@ void dma_imp::run(string infile, string cashflow_file, string order_stats_file, 
 
     calculate_ama();
 
-    simulate_trades();
+    double pl = simulate_trades();
 
     file.close();
     statfile.close();
     cashfile.close();
     pandlfile.close();
+
+    return pl;
 }
