@@ -17,7 +17,9 @@ vector<date_entry> csv_parser::parse_csv(string filename)
         stringstream ss(line);
         string token;
         getline(ss, token, ',');
-        temp.date = token;
+
+        string t=token.substr(8,2)+"/"+token.substr(5,2)+"/"+token.substr(0,4);
+        temp.date = t;
 
         getline(ss, token, ',');
         temp.close = stod(token);

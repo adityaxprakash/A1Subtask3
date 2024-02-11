@@ -36,7 +36,7 @@ double rsi::simulate_trades()
         double curr_price = entries[i + n].close;
         string today = entries[i + n].date;
         double curr_rsi;
-        if (curr_avg_loss == 0)
+        if (abs(curr_avg_loss) < 1e-6)
         {
             curr_rsi = 100;
         }

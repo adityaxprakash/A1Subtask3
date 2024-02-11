@@ -14,6 +14,7 @@ void macd::calculate_macd()
     long_ewm[1] = entries[1].close;
     macd_arr.push_back(0);
     signal_line.push_back(0);
+    
     for (int i = 2; i < num_days; i++)
     {
         short_ewm[i] = calculate_ewm(short_n, short_ewm[i - 1], entries[i].close);
@@ -23,7 +24,9 @@ void macd::calculate_macd()
     for (int i = 2; i < num_days; i++)
     {
         signal_line.push_back(calculate_ewm(macd_n, signal_line[i - 1], macd_arr[i]));
+        // cout<<entries[i+n].date<<" "<<macd_arr[i]<<" "<<signal_line[i]<<" "<<short_ewm[i+n]<<" "<<long_ewm[i+n]<<endl;
     }
+    
 }
 
 double macd::simulate_trades()
@@ -35,8 +38,8 @@ double macd::simulate_trades()
         double curr_signal = signal_line[i];
         double curr_macd = macd_arr[i];
         double curr_price = entries[i].close;
-        // cout<<curr_signal<<" "<<curr_macd<<" "<<curr_price<<endl;
         string today = entries[i].date;
+
 
         if (curr_macd > curr_signal && position < x)
         {

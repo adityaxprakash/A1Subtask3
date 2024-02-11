@@ -45,10 +45,6 @@ double dma::simulate_trades()
         }
         else if (curr_dma - curr_price >= p * curr_sd && position > -x)
         {
-            if (position == -x)
-            {
-                continue;
-            }
             cashflow += curr_price;
             position--;
             write_orders(today, "SELL", "1", curr_price);
