@@ -1,29 +1,11 @@
-#include "../headers/lr.h"
+#include "lr.h"
 
-vector<double> fr;
-
-vector<vector<double>> training_data;
-vector<double> means, std_devs;
-
-vector<vector<double>> x_train;
-vector<vector<double>> y_train;
-
-
-vector<vector<double>> x_test;
-vector<vector<double>> y_test;
-vector<vector<double>> predictions_values;
-vector<vector<double>> theta_values;
-
-double alpha;
-int num_iters;
-
-vector<string> dates;
-
-
-
-ofstream cashfile;
-ofstream statfile;
-ofstream pandlfile;
+void swapRows(vector<vector<double>> &matrix, int i, int j)
+{
+    vector<double> temp = matrix[i];
+    matrix[i] = matrix[j];
+    matrix[j] = temp;
+}
 
 vector<vector<double>> matrix_multiplication(vector<vector<double>> A, vector<vector<double>> B)
 {
@@ -44,7 +26,6 @@ vector<vector<double>> matrix_multiplication(vector<vector<double>> A, vector<ve
     }
     return result;
 }
-
 vector<vector<double>> transpose(vector<vector<double>> A)
 {
     vector<vector<double>> result;
@@ -59,252 +40,145 @@ vector<vector<double>> transpose(vector<vector<double>> A)
     }
     return result;
 }
-
-vector<vector<double>> inverse(vector<vector<double>> A)
+vector<vector<double>> inverse(vector<vector<double>> &matrix)
 {
-    const double EPS = 1E-9;
-    int n = A.size();
-    std::vector<std::vector<double>> res(n, std::vector<double>(n));
+    int n = matrix.size();
+
+    vector<vector<double>> inverse(n, vector<double>(n, 0));
+    // Initialize the identity matrix for inverse
     for (int i = 0; i < n; ++i)
-        res[i][i] = 1;
+        inverse[i][i] = 1;
 
     for (int i = 0; i < n; ++i)
     {
-        int maxj = i;
+        // Find pivot
+        int pivot = i;
         for (int j = i + 1; j < n; ++j)
-            if (abs(A[j][i]) > abs(A[maxj][i]))
-                maxj = j;
-        if (abs(A[maxj][i]) < EPS)
-            throw std::runtime_error("No inverse exists");
-        std::swap(A[i], A[maxj]);
-        std::swap(res[i], res[maxj]);
-
-        double d = A[i][i];
-        for (int j = 0; j < n; ++j)
         {
-            A[i][j] /= d;
-            res[i][j] /= d;
+            if (abs(matrix[j][i]) > abs(matrix[pivot][i]))
+                pivot = j;
         }
 
+        // Swap pivot row with current row
+        swapRows(matrix, i, pivot);
+        swapRows(inverse, i, pivot);
+
+        // Make diagonal elements of the current row to 1
+        double divisor = matrix[i][i];
         for (int j = 0; j < n; ++j)
-            if (j != i && abs(A[j][i]) > EPS)
+        {
+            matrix[i][j] /= divisor;
+            inverse[i][j] /= divisor;
+        }
+
+        // Make other elements of the current column to 0
+        for (int j = 0; j < n; ++j)
+        {
+            if (j != i)
+            {
+                double multiplier = matrix[j][i];
                 for (int k = 0; k < n; ++k)
                 {
-                    A[j][k] -= A[i][k] * A[j][i];
-                    res[j][k] -= res[i][k] * A[j][i];
+                    matrix[j][k] -= multiplier * matrix[i][k];
+                    inverse[j][k] -= multiplier * inverse[i][k];
                 }
-    }
-    return res;
-}
-
-lr::lr(string start, string end, double x, double p, string train_start, string train_end)
-{
-    this->start_date = start;
-    this->end_date = end;
-    this->x = x;
-    this->p = p;
-    this->train_start_date = train_start;
-    this->train_end_date = train_end;
-}
-
-void lr::read_file(string train_file, vector<vector<double>> &x, vector<vector<double>> &y)
-{
-    cout << "Reading file" << endl;
-    ifstream file(train_file);
-    string line;
-    int n = 0;
-    int k = 0;
-    while (getline(file, line))
-    {
-        if (k == 0)
-        {
-            k++;
-            continue;
-        }
-        vector<double> row;
-        stringstream ss(line);
-        string datee;
-        int c = 0;
-        while (getline(ss, datee, ','))
-        {
-            if (c == 0)
-            {
-                dates.push_back(datee);
-                c++;
-            }
-            else
-            {
-                row.push_back(stod(datee));
             }
         }
-        training_data.push_back(row);
-    }
-    file.close();
-
-    cout << "Data read" << endl;
-
-    for (int i = 0; i < training_data.size(); i++)
-    {
-        // training_data[i].push_back(training_data[i][training_data[i].size() - 1]);
-        // if (i < training_data.size() - 1)
-        //     training_data[i][training_data[i].size() - 1] = training_data[i + 1][training_data[i + 1].size() - 1];
-        // else
-        //     training_data[i][training_data[i].size() - 2] = 0;
-        // double temp = training_data[i].back();
-        // training_data[i][training_data[i].size() - 1] = training_data[i][training_data[i].size() - 3];
-        // training_data[i][training_data[i].size() - 3] = temp;
-        if (i < training_data.size() - 1){
-            training_data[i].push_back(training_data[i + 1][training_data[i + 1].size() - 2]);
-            training_data[i].push_back(training_data[i + 1][training_data[i + 1].size() - 2]);
-        }
-        else{
-            training_data[i].push_back(0);
-            training_data[i].push_back(0);
-        }    
     }
 
-    cout << "Data transformed" << endl;
-    training_data.erase(training_data.end());
+    return inverse;
+}
 
+void lr::normal_equation(vector<vector<double>> &x_arr, vector<vector<double>> &y_arr)
+{
+    vector<vector<double>> a = matrix_multiplication(transpose(x_arr), x_arr);
+    theta_values = matrix_multiplication(inverse(a), matrix_multiplication(transpose(x_arr), y_arr));
+    // for(auto weight: theta_values)
+    // {
+    //     for(auto w: weight)
+    //     {
+    //         cout<<w<<" ";
+    //     }
+    //     cout<<endl;
     
-    for (int i = 0; i < training_data[0].size(); i++)
-    {
-        double mean = 0;
-        for (int j = 0; j < training_data.size(); j++)
-        {
-            mean += training_data[j][i];
-        }
-        mean = mean / training_data.size();
-        means.push_back(mean); // Store the mean
-
-        double std_dev = 0;
-        for (int j = 0; j < training_data.size(); j++)
-        {
-            std_dev += (training_data[j][i] - mean) * (training_data[j][i] - mean);
-        }
-        std_dev = sqrt(std_dev / training_data.size());
-        std_devs.push_back(std_dev); // Store the standard deviation
-
-        for (int j = 0; j < training_data.size(); j++)
-        {
-            training_data[j][i] = (training_data[j][i] - mean) / std_dev;
-        }
-    }
-    cout << "Data normalised" << endl;
-
-    
-    for (int i = 0; i < training_data.size(); i++)
-    {
-        x.push_back(fr);
-        x[i].push_back(1);
-        for (int j = 0; j < training_data[0].size() - 1; j++)
-        {
-            
-            x[i].push_back(training_data[i][j]);
-        }
-        y.push_back(fr);
-        y[i].push_back(training_data[i][training_data[0].size() - 1]);
-        
-    }
-
-    cout << "x_train size: " << x.size() << " " << x[0].size() << endl;
-    cout << "y_train size: " << y.size() << " " << y[0].size() << endl;
-    cout << "Data loaded into matrix" << endl;
-    training_data.clear();
+    // }
 }
 
-void normal_equation()
+void lr::calculatelr(vector<vector<double>> &x_arr, vector<vector<double>> &y_arr, vector<date_entry> &data_entries)
 {
-    theta_values = matrix_multiplication(inverse(matrix_multiplication(transpose(x_train), x_train)), matrix_multiplication(transpose(x_train), y_train));
-    cout << "Theta values: " << theta_values.size() << " " << theta_values[0].size() << endl;
-}
-
-void write_daily_flow(string date, double cashflow)
-{
-    // cout<<date<<" "<<cashflow<<endl;
-    // cashfile << "Date, Cashflow\n";
-    string to_write = date + "," + to_string(cashflow) + "\n";
-    cashfile << to_write;
-}
-
-void write_orders(string date, string action, string quantity, double price)
-{
-    string to_write = date + "," + action + "," + quantity + "," + to_string(price) + "\n";
-    statfile << to_write;
-}
-
-double lr::simulate_trade(string cashflow_file, string order_stats_file, string pandl_file)
-{
-    ofstream cashfile(cashflow_file);
-    ofstream statfile(order_stats_file);
-    ofstream pandlfile(pandl_file);
-    cashfile << "Date, Cash\n";
-    predictions_values = matrix_multiplication(x_test, theta_values);
-    cout << "Predictions size: " << predictions_values.size() << " " << predictions_values[0].size() << endl;
-
-    for (int i = 0; i < predictions_values.size(); i++)
+    // cout<<"Called"<<" "<<entries.size()<<endl;
+    for (int i = 0; i < data_entries.size() - 1; i++)
     {
-        predictions_values[i][0] = predictions_values[i][0] * std_devs[std_devs.size() - 1] + means[means.size() - 1];
+        vector<double> temp;
+        // cout<<entries[i].high<<" "<<endl;
+        temp.push_back(1);
+        temp.push_back(data_entries[i].high);
+        temp.push_back(data_entries[i].low);
+        temp.push_back(data_entries[i].open);
+        temp.push_back(data_entries[i].close);
+        temp.push_back(data_entries[i].vwap);
+        temp.push_back(data_entries[i].trades);
+        temp.push_back(data_entries[i + 1].open);
+        x_arr.push_back(temp);
+        y_arr.push_back({data_entries[i + 1].close});
     }
-    for (int i = 0; i < y_test.size(); i++)
-    {
-        y_test[i][0] = y_test[i][0] * std_devs[std_devs.size() - 1] + means[means.size() - 1];
-    }
+}
+double lr::simulate_trade(string cashflow_file, string order_stats_file, string pandl_file, vector<vector<double>> &x_arr, vector<vector<double>> &y_arr)
+{
+    predictions_values = matrix_multiplication(x_arr, theta_values);
+    // cout << "Predictions size: " << predictions_values.size() << " " << predictions_values[0].size() << endl;
 
-    int siumation_days = x_test.size();
-    double cashflow = 0;
-    int current_position = 0;
-    double current_price = 0;
-    double current_cash = 0;
-    for (int i = 0; i < siumation_days; i++)
+    int sim_days = x_arr.size();
+    for (int i = 0; i < sim_days; i++)
     {
-        cout<<"Predictions: "<<predictions_values[i][0]<<" "<<y_test[i][0]<<endl;
-        if (predictions_values[i][0] > (100 + p) * (y_test[i][0]) / 100)
+        string today = test_entries[i].date;
+        // cout << "Predictions: " << predictions_values[i][0] << " " << y_arr[i][0] << endl;
+        if (predictions_values[i][0] - y_arr[i][0] >= p * (y_arr[i][0]) / 100.0 && position < x)
         {
-            if (current_position == x)
-            {
-                continue;
-            }
-            else
-            {
-                current_position++;
-                current_cash -= y_test[i][0];
-                statfile << dates[i] << ",BUY,1," << y_test[i][0] << endl;
-                
-            }
+            position++;
+            cashflow -= y_arr[i][0];
+            write_orders(today, "BUY", "1", y_arr[i][0]);
         }
-       
-        else if (predictions_values[i][0] < (100 - p) * (y_test[i][0]) / 100)
+
+        else if (y_arr[i][0] - predictions_values[i][0] >= p * y_arr[i][0] / 100.0 && position > -x)
         {
-            if (current_position == -x)
-            {
-                continue;
-            }
-            else
-            {
-                current_position--;
-                current_cash += y_test[i][0];
-                statfile << dates[i] << ",SELL,1," << y_test[i][0] << endl;
-            }
+            position--;
+            cashflow += y_arr[i][0];
+            write_orders(today, "SELL", "1", y_arr[i][0]);
         }
-        cashflow = current_cash;
-        string to_write = dates[i] + "," + to_string(cashflow) + "\n";
-        cashfile << to_write;
+        write_daily_flow(today, cashflow);
     }
-    double final_cash = current_cash + current_position * y_test[siumation_days - 1][0];
-    
+
+    double final_cash = cashflow + position * y_arr[sim_days - 1][0];
+    write_pandl(final_cash);
     return final_cash;
 }
 
-double lr::run(string infile, string cashflow_file, string train_file, string order_stats_file, string pandl_file)
+lr::lr(string start, string end, int x_, int p_, int n_, string cashflow_file, string order_stats_file, string pandl_file, string train_start, string train_end) : strategy(start, end, x_, n_, cashflow_file, order_stats_file, pandl_file)
 {
-    cout << "Running" << endl;
-    read_file(train_file, x_train, y_train);
-    cout << "Training data read" << endl;
-    read_file(infile, x_test, y_test);
-    cout << "Test data read" << endl;
-    normal_equation();
-    cout << "Normal equation done" << endl;
-    return simulate_trade(cashflow_file, order_stats_file, pandl_file);
-    cout << "Simulation done" << endl;
+    p = p_;
+    train_start_date = train_start;
+    train_end_date = train_end;
+}
+
+double lr::predict(string train_file, string test_file)
+{
+    for (auto entry : parser.parse_csv(train_file))
+    {
+        train_entries.push_back(entry);
+    }
+    calculatelr(x_train, y_train, train_entries);
+    normal_equation(x_train, y_train);
+
+    for (auto entry : parser.parse_csv(test_file))
+    {
+        test_entries.push_back(entry);
+    }
+    calculatelr(x_test, y_test, test_entries);
+    return simulate_trade("cashflow.csv", "order_stats.csv", "pandl.csv", x_test, y_test);
+}
+
+double lr::predict(string filename)
+{
+    return 1.0;
 }

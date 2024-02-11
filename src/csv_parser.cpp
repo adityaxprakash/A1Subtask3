@@ -44,5 +44,7 @@ vector<date_entry> csv_parser::parse_csv(string filename)
         
         entries.push_back(temp);
     }
+    file.close();
     return entries;
+
 }

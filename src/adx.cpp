@@ -64,7 +64,7 @@ void adx::calculate_adx()
             dx.push_back(100 * (plus_di[i] - minus_di[i]) / (plus_di[i] + minus_di[i]));
             adx_arr.push_back(calculate_ewm(n, adx_arr[i - 1], dx[i]));
         }
-        cout << adx_arr[i] << " " << dx[i] << endl;
+        // cout << adx_arr[i] << " " << dx[i] << endl;
     }
 }
 

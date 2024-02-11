@@ -40,6 +40,5 @@ class strategy
         dummy.vwap = 0;
         entries.push_back(dummy);
     }
-
     virtual double predict(string filename)=0;
 };
