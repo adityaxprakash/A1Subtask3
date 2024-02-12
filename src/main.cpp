@@ -5,11 +5,12 @@
 #include "adx.h"
 #include "basic.h"
 #include "lr.h"
+#include "mrp.h"
 // #include <omp.h>
 
-string cashflow_name = "data/daily_cashflow.csv";
-string order_name = "data/order_statistics.csv";
-string pandl_name = "data/final_pnl.txt";
+string cashflow_name = "daily_cashflow.csv";
+string order_name = "order_statistics.csv";
+string pandl_name = "final_pnl.txt";
 
 void get_stock_data(string symbol, int n, string start_date, string end_date, string filename)
 {
@@ -182,6 +183,9 @@ int main(int argc, char *argv[])
     double adx_thresh = stod(argv[13]);
     string train_start = argv[14];
     string train_end = argv[15];
+    string symbol1=argv[16];
+    string symbol2=argv[17];
+    double threshold=stod(argv[18]);
 
     string infile_name = "data/" + symbol + ".csv";
     if (strat == "LINEAR_REGRESSION")
@@ -192,6 +196,18 @@ int main(int argc, char *argv[])
         get_stock_data(symbol, 1, start_date, end_date, testfile);
         lr tool(start_date, end_date, x, p, 1, cashflow_name, order_name, pandl_name, train_start, train_end);
         tool.predict(trainfile, testfile);
+        return 0;
+    }
+    else if(strat=="PAIRS")
+    {
+        string infile_name1 = "data/" + symbol1 + ".csv";
+        string infile_name2 = "data/" + symbol2 + ".csv";
+        string order_stat1="order_statistics_1.csv";
+        string order_stat2="order_statistics_2.csv";
+        get_stock_data(symbol1, n, start_date, end_date, infile_name1);
+        get_stock_data(symbol2, n, start_date, end_date, infile_name2);
+        mrp tool(start_date, end_date, x, n, threshold, cashflow_name, order_name, pandl_name,order_stat1,order_stat2);
+        tool.predict1(infile_name1,infile_name2);
         return 0;
     }
 

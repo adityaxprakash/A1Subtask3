@@ -43,8 +43,10 @@ $(BUILDDIR):
 
 # Clean rule
 clean:
-	@rm -rf $(BUILDDIR)/* $(EXECUTABLE) $(DATADIR)/*
+	@rm -rf $(BUILDDIR)/* $(EXECUTABLE) $(DATADIR)/* $(wildcard *.csv) $(wildcard *.txt) $(.vscode)
+
 	@echo "Cleaned build and data directories"
+
 
 # Phony target to prevent conflicts with files named 'clean' or 'all'
 .PHONY: clean all run compile_msg
@@ -52,7 +54,7 @@ clean:
 # Additional target to run the program with command-line arguments
 run:
 	@echo "Running the predictor"
-	@ ./$(EXECUTABLE) $(strategy) $(symbol) $(n) $(x) "$(start_date)" "$(end_date)" $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold) $(train_start_date) $(train_end_date) 
+	@ ./$(EXECUTABLE) $(strategy) $(symbol) $(n) $(x) "$(start_date)" "$(end_date)" $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold) $(train_start_date) $(train_end_date) $(symbol1) $(symbol2) $(threshold)
 	@echo "Results written to data directory"
 
 strategy ?= DEFAULT_STRATEGY
@@ -70,5 +72,7 @@ overbought_threshold ?= 0
 adx_threshold ?= 0
 train_start_date ?= DEFAULT_TRAIN_START_DATE
 train_end_date ?= DEFAULT_TRAIN_END_DATE
-
+symbol1 ?= DEFAULT_SYMBOL1
+symbol2 ?= DEFAULT_SYMBOL2
+threshold ?= 0
 
