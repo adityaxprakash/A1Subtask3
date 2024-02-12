@@ -34,6 +34,7 @@ double rsi::simulate_trades()
         double curr_avg_gain = avg_gain[i];
         double curr_avg_loss = avg_loss[i];
         double curr_price = entries[i + n].close;
+
         string today = entries[i + n].date;
         double curr_rsi;
         if (abs(curr_avg_loss) < 1e-6)
@@ -64,6 +65,7 @@ double rsi::simulate_trades()
             position--;
             write_orders(today, "SELL", "1", curr_price);
         }
+        cout<<today<<" "<<curr_avg_gain<<" "<<curr_avg_loss<< " "<<curr_rsi<<endl;
 
         write_daily_flow(today, cashflow);
     }
