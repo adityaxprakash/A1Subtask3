@@ -131,7 +131,7 @@ double lr::simulate_trade(string cashflow_file, string order_stats_file, string 
     int sim_days = x_arr.size();
     for (int i = 0; i < sim_days; i++)
     {
-        string today = test_entries[i].date;
+        string today = test_entries[i+1].date;
         // cout << "Predictions: " << predictions_values[i][0] << " " << y_arr[i][0] << endl;
         if (predictions_values[i][0] - y_arr[i][0] >= p * (y_arr[i][0]) / 100.0 && position < x)
         {
