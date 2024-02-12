@@ -1,13 +1,19 @@
 #include "mrp.h"
 
-mrp::mrp(string start, string end, double x_, int n_, double threshold, string cashflow_file, string order_stats_file, string pandl_file, string order_stats1, string order_stats2) : strategy(start, end, x_, n_, cashflow_file, order_stats_file, pandl_file)
+mrp::mrp(string start, string end, double x_, int n_, double threshold, string cashflow_file, string pandl_file, string order_stats1, string order_stats2) : strategy(start, end, x_, n_, cashflow_file, order_stats1, pandl_file), orders_2(order_stats2, "Date,Order_dir,Quantity,Price")
 {
     mrp_threshold = threshold;
-    order_stats_file1 = order_stats1;
-    order_stats_file2 = order_stats2;
+    // order_stats_file1 = order_stats1;
+    // order_stats_file2 = order_stats2;
 }
 
-void mrp::calculate_mrp()
+void mrp::write_orders_2(string date, string action, string quantity, double price)
+{
+    string to_write = date + "," + action + "," + quantity + "," + to_string(price);
+    orders_2.write(to_write);
+}
+
+void mrp::store_stock_prices()
 {
     for (int i = 1; i < entries.size(); i++)
     {
@@ -18,6 +24,16 @@ void mrp::calculate_mrp()
             stock2_prices.push_back(entries[i].close);
         }
     }
+}
+
+void mrp::calculate_mrp()
+{
+
+    vector<double> rolling_mean = {0};
+    vector<double> rolling_std = {0};
+    vector<double> sum = {0};
+    vector<double> square_sum = {0};
+
     for (int i = 1; i < stock1_prices.size(); i++)
     {
         spread.push_back(stock1_prices[i] - stock2_prices[i]);
@@ -44,13 +60,6 @@ void mrp::calculate_mrp()
 
 double mrp::simulate_trades()
 {
-
-    ofstream ofile1(order_stats_file1);
-    ofstream ofile2(order_stats_file2);
-    ofile1<<"Date,Order_dir,Quantity,Price\n";
-    ofile2<<"Date,Order_dir,Quantity,Price\n";
-
-    // cout << mrp_threshold << endl;
     for (int i = 1; i < spread.size(); i++)
     {
         string today = entries[i].date;
@@ -60,19 +69,19 @@ double mrp::simulate_trades()
             continue;
         }
         double curr_z_score = z_score[i - n];
-        if (curr_z_score > mrp_threshold && position>-x)
+        if (curr_z_score > mrp_threshold && position > -x)
         {
             position--;
             cashflow += spread[i];
-            ofile1 << today << ",SELL,1," << stock1_prices[i] << endl;
-            ofile2 << today << ",BUY,1," << stock2_prices[i] << endl;
+            write_orders(today, "SELL", "1", stock1_prices[i]);
+            write_orders_2(today, "BUY", "1", stock2_prices[i]);
         }
         else if (curr_z_score < -mrp_threshold && position < x)
         {
             position++;
             cashflow -= spread[i];
-            ofile1 << today << ",BUY,1," << stock1_prices[i] << endl;
-            ofile2 << today << ",SELL,1," << stock2_prices[i] << endl;
+            write_orders(today, "BUY", "1", stock1_prices[i]);
+            write_orders_2(today, "SELL", "1", stock2_prices[i]);
         }
         // cout << today << " " << curr_z_score << endl;
         write_daily_flow(today, cashflow);
@@ -81,22 +90,23 @@ double mrp::simulate_trades()
     return cashflow + position * spread[spread.size() - 1];
 }
 
-double mrp::predict1(string filename, string filename2)
+double mrp::predict(string filename, string filename2)
 {
     for (auto entry : parser.parse_csv(filename))
     {
         entries.push_back(entry);
     }
-    cout << entries.size() << endl;
+    // cout << entries.size() << endl;
     for (auto entry : parser.parse_csv(filename2))
     {
         entries.push_back(entry);
     }
-    cout << entries.size() << endl;
+    store_stock_prices();
     calculate_mrp();
     return simulate_trades();
 }
 double mrp::predict(string filename)
 {
+    cout<<"Shouldn't be here"<<endl;
     return 0;
 }

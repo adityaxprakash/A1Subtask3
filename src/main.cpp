@@ -11,6 +11,8 @@
 string cashflow_name = "daily_cashflow.csv";
 string order_name = "order_statistics.csv";
 string pandl_name = "final_pnl.txt";
+string order_stat1="order_statistics_1.csv";
+string order_stat2="order_statistics_2.csv";
 
 void get_stock_data(string symbol, int n, string start_date, string end_date, string filename)
 {
@@ -202,12 +204,11 @@ int main(int argc, char *argv[])
     {
         string infile_name1 = "data/" + symbol1 + ".csv";
         string infile_name2 = "data/" + symbol2 + ".csv";
-        string order_stat1="order_statistics_1.csv";
-        string order_stat2="order_statistics_2.csv";
+
         get_stock_data(symbol1, n, start_date, end_date, infile_name1);
         get_stock_data(symbol2, n, start_date, end_date, infile_name2);
-        mrp tool(start_date, end_date, x, n, threshold, cashflow_name, order_name, pandl_name,order_stat1,order_stat2);
-        tool.predict1(infile_name1,infile_name2);
+        mrp tool(start_date, end_date, x, n, threshold, cashflow_name, pandl_name,order_stat1,order_stat2);
+        tool.predict(infile_name1,infile_name2);
         return 0;
     }
 

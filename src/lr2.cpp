@@ -180,5 +180,6 @@ double lr::predict(string train_file, string test_file)
 
 double lr::predict(string filename)
 {
+    cout << "Shouldn't be here" << endl;
     return 1.0;
 }
