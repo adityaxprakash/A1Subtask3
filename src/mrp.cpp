@@ -22,7 +22,7 @@ void mrp::calculate_mrp()
     {
         spread.push_back(stock1_prices[i] - stock2_prices[i]);
     }
-    for (int i = 1; i <= spread.size(); i++)
+    for (int i = 1; i < spread.size(); i++)
     {
         if (i <= n)
         {

@@ -12,7 +12,7 @@ def write_stock_data(symbol_name, start_date, end_date, n, output_file):
     df.to_csv(output_file,index=False)
 
 def get_stock_data(symbol_name, start_date, end_date,n,columns):
-    pre_start_date = start_date - relativedelta(days=n+10)
+    pre_start_date = start_date - relativedelta(days=2*n+10)
     pre_end_date = start_date - relativedelta(days=1)
     try:
         df = stock_df(symbol=symbol_name, from_date=start_date, to_date=end_date, series="EQ").iloc[::-1]
