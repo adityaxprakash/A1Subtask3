@@ -47,7 +47,10 @@ double mrp::simulate_trades()
 
     ofstream ofile1(order_stats_file1);
     ofstream ofile2(order_stats_file2);
-    cout << mrp_threshold << endl;
+    ofile1<<"Date,Order_dir,Quantity,Price\n";
+    ofile2<<"Date,Order_dir,Quantity,Price\n";
+
+    // cout << mrp_threshold << endl;
     for (int i = 1; i < spread.size(); i++)
     {
         string today = entries[i].date;
@@ -71,7 +74,7 @@ double mrp::simulate_trades()
             ofile1 << today << ",BUY,1," << stock1_prices[i] << endl;
             ofile2 << today << ",SELL,1," << stock2_prices[i] << endl;
         }
-        cout << today << " " << curr_z_score << endl;
+        // cout << today << " " << curr_z_score << endl;
         write_daily_flow(today, cashflow);
     }
     write_pandl(cashflow + position * spread[spread.size() - 1]);
