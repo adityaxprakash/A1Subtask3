@@ -65,7 +65,7 @@ double rsi::simulate_trades()
             position--;
             write_orders(today, "SELL", "1", curr_price);
         }
-        cout<<today<<" "<<curr_avg_gain<<" "<<curr_avg_loss<< " "<<curr_rsi<<endl;
+        // cout<<today<<" "<<curr_avg_gain<<" "<<curr_avg_loss<< " "<<curr_rsi<<endl;
 
         write_daily_flow(today, cashflow);
     }

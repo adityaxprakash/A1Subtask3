@@ -77,7 +77,10 @@ double dma_imp::simulate_trades()
                 {
                     sold_date.pop_front();
                 }
-                bought_date.push_back(i);
+                else 
+                {
+                    bought_date.push_back(i);
+                }
                 cashflow -= curr_price;
                 position++;
                 write_orders(today, "BUY", "1", curr_price);
@@ -98,7 +101,10 @@ double dma_imp::simulate_trades()
                 {
                     bought_date.pop_front();
                 }
-                sold_date.push_back(i);
+                else 
+                {
+                    sold_date.push_back(i);
+                }
                 cashflow += curr_price;
                 position--;
                 write_orders(today, "SELL", "1", curr_price);
@@ -110,7 +116,7 @@ double dma_imp::simulate_trades()
             if(i-last_bought>=max_hold_days && position>-x)
             {
                 bought_date.pop_front();
-                sold_date.push_back(i);
+                // sold_date.push_back(i);
                 cashflow += curr_price;
                 position--;
                 write_orders(today, "SELL", "1", curr_price);
@@ -118,7 +124,7 @@ double dma_imp::simulate_trades()
             else if(i-last_sold>=max_hold_days && position<x)
             {
                 sold_date.pop_front();
-                bought_date.push_back(i);
+                // bought_date.push_back(i);
                 cashflow -= curr_price;
                 position++;
                 write_orders(today, "BUY", "1", curr_price);

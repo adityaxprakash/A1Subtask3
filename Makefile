@@ -54,7 +54,7 @@ clean:
 # Additional target to run the program with command-line arguments
 run:
 	@echo "Running the predictor"
-	@ ./$(EXECUTABLE) $(strategy) $(symbol) $(n) $(x) "$(start_date)" "$(end_date)" $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold) $(train_start_date) $(train_end_date) $(symbol1) $(symbol2) $(threshold)
+	@ ./$(EXECUTABLE) $(strategy) $(symbol) $(n) $(x) "$(start_date)" "$(end_date)" $(p) $(max_hold_days) $(c1) $(c2) $(oversold_threshold) $(overbought_threshold) $(adx_threshold) $(train_start_date) $(train_end_date) $(symbol1) $(symbol2) $(threshold) $(stop_loss_threshold)
 	@echo "Results written to data directory"
 
 strategy ?= DEFAULT_STRATEGY
@@ -75,4 +75,5 @@ train_end_date ?= DEFAULT_TRAIN_END_DATE
 symbol1 ?= DEFAULT_SYMBOL1
 symbol2 ?= DEFAULT_SYMBOL2
 threshold ?= 0
+stop_loss_threshold ?= -1
 
