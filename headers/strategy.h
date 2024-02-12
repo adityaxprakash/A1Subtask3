@@ -23,7 +23,7 @@ class strategy
     double calculate_ewm(int k, double prev, double curr);
 
     public:
-    strategy(string start, string end, int x_, int n_, string cashflow_file, string order_stats_file, string pandl_file): daily_flow(cashflow_file, "Date,Cashflow"), orders(order_stats_file, "Date,Order_dir,Quantity,Price"), pandl(pandl_file, "Final Profit/Loss")
+    strategy(string start, string end, int x_, int n_, string cashflow_file, string order_stats_file, string pandl_file): daily_flow(cashflow_file, "Date,Cashflow"), orders(order_stats_file, "Date,Order_dir,Quantity,Price"), pandl(pandl_file,"NO_HEADER")
     {
         start_date = start;
         end_date = end;

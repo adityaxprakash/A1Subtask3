@@ -8,7 +8,8 @@ writer::writer(string filename, string header)
         cout << "Error opening file" << endl;
         return;
     }
-    file << header << endl;
+    if(header!="NO_HEADER")
+        file << header << endl;
 }
 
 writer::~writer()
