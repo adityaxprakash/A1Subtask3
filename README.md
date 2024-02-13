@@ -121,7 +121,7 @@ Here too on increasing n, we see a decrease in profits.
 
 ## Other Insights
 
-## Mean Reverting Pairs Strategy using Stop-Loss
+### Mean Reverting Pairs Strategy using Stop-Loss
 We have incorporated stop-loss into our mean reverting pairs strategy to minimize losses if the stock behaves unexpectedly. 
 
 Suppose we have shorted the spread. When the z-score crosses the positive stop-threshold, buying back prevents our losses from piling up. On the other hand, the stock crossing the negative stop-threshold is also an indicator to close the position. The reason behind this choice is that once the score crosses the stop-threshold on either side, its an indication of unpredictability. If the z-score drops heavily, we have already made a good bunch of profit and its beneficial for us to close this highly profitable opening before it inevitably recovers.
