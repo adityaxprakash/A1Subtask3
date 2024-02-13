@@ -2,7 +2,6 @@
 
 macd::macd(string start, string end, int x_, string cashflow_file, string order_stats_file, string pandl_file, int n_) : strategy(start, end, x_, n_, cashflow_file, order_stats_file, pandl_file)
 {
-    // n = n_;
 }
 
 void macd::calculate_macd()
@@ -24,7 +23,6 @@ void macd::calculate_macd()
     for (int i = 2; i < num_days; i++)
     {
         signal_line.push_back(calculate_ewm(macd_n, signal_line[i - 1], macd_arr[i]));
-        // cout<<entries[i+n].date<<" "<<macd_arr[i]<<" "<<signal_line[i]<<" "<<short_ewm[i+n]<<" "<<long_ewm[i+n]<<endl;
     }
     
 }

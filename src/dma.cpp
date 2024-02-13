@@ -36,7 +36,6 @@ double dma::simulate_trades()
         double curr_sd = sd[i];
         double curr_price = entries[i + n].close;
         string today = entries[i + n].date;
-        // cout<<curr_price<<" "<<curr_dma<<" "<<curr_sd<<endl;
         if (curr_price - curr_dma >= p * curr_sd && position < x)
         {
             cashflow -= curr_price;

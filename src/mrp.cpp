@@ -3,8 +3,6 @@
 mrp::mrp(string start, string end, double x_, int n_, double threshold, string cashflow_file, string pandl_file, string order_stats1, string order_stats2) : strategy(start, end, x_, n_, cashflow_file, order_stats1, pandl_file), orders_2(order_stats2, "Date,Order_dir,Quantity,Price")
 {
     mrp_threshold = threshold;
-    // order_stats_file1 = order_stats1;
-    // order_stats_file2 = order_stats2;
 }
 
 void mrp::write_orders_2(string date, string action, string quantity, double price)
@@ -63,7 +61,6 @@ double mrp::simulate_trades()
     for (int i = 1; i < spread.size(); i++)
     {
         string today = entries[i].date;
-        // cout<<today<<endl;
         if (i <= n)
         {
             continue;
@@ -83,7 +80,6 @@ double mrp::simulate_trades()
             write_orders(today, "BUY", "1", stock1_prices[i]);
             write_orders_2(today, "SELL", "1", stock2_prices[i]);
         }
-        // cout << today << " " << curr_z_score << endl;
         write_daily_flow(today, cashflow);
     }
     write_pandl(cashflow + position * spread[spread.size() - 1]);
@@ -96,7 +92,6 @@ double mrp::predict(string filename, string filename2)
     {
         entries.push_back(entry);
     }
-    // cout << entries.size() << endl;
     for (auto entry : parser.parse_csv(filename2))
     {
         entries.push_back(entry);
