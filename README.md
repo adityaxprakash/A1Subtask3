@@ -33,6 +33,7 @@ It is recommended to use this on a UNIX based system. Clone the repository into 
     make strategy=PAIRS symbol1=SBIN symbol2=ADANIENT x=5 n=20 threshold=2 start_date="a" end_date="b"
     make strategy=PAIRS symbol1=SBIN symbol2=ADANIENT x=5 n=20 threshold=2 stop_loss_threshold=4 start_date="a" end_date="b"
 ```
+Replace a,b,c and d by desired dates in DD/MM/YYYY format.
 To clean existing built and data files, run:
 ```bash
     make clean
