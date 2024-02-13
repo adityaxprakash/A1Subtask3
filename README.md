@@ -102,19 +102,20 @@ Other optimizations include:
 
 ## Insights
 We played around with the values of the parameters to get a feel of how different strategies behave. We plotted all such data as follows:
-<image src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/basic.jpeg" >
-<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma.jpeg" >
-<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma_n.jpeg" >
+<image src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/basic.jpeg">
+The basic strategy was not a long-term strategy due to meager profits. It didn't give profits over a prolonged period. Increasing *n* over time bound doesn't necessarily increase the profit.
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma.jpeg">
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma_n.jpeg">
+DMA strategy consistently gives profits over a long period while increasing with an increasing p. Increasing *n* harms the profits with time.
 
-* The basic strategy was not a long-term strategy due to meager profits. It didn't give profits over a prolonged period. Increasing *n* over time bound doesn't necessarily increase the profit.
-* DMA strategy consistently gives profits over a long period while increasing with an increasing p. Increasing *n* harms the profits with time.
+<image src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/macd.jpeg">
+MACD good
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/RSI.jpeg">
+RSI strategy decreases with increasing n
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma%2B%2B.jpeg">
+DMA++ strategy dec
 
-<imr src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma%2B%2B.jpeg"  > 
-<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/macd.jpeg" >
-<imr src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/rsi.jpeg" > 
-* RSI strategy decreases with increasing n
-* DMA++ strategy dec
-* MACD good
+
 
 
 
