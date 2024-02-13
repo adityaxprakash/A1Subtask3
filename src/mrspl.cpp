@@ -15,6 +15,9 @@ void mrpsl::write_orders_2(string date, string action, string quantity, double p
 
 void mrpsl::calculate_mrp()
 {
+
+    vector<double> sum = {0};
+    vector<double> square_sum = {0};
     for (int i = 1; i < entries.size(); i++)
     {
         if (i <= (entries.size()) / 2)
@@ -96,11 +99,11 @@ double mrpsl::simulate_trades()
 
         if (currscore > mrp_threshold && position > -x)
         {
-            if (position<=0)
+            if (position <= 0)
             {
                 openpositions.insert(i);
             }
-            if (position>0 && openpositions.find(last_position) != openpositions.end())
+            if (position > 0 && openpositions.find(last_position) != openpositions.end())
             {
                 openpositions.erase(last_position);
             }
@@ -111,11 +114,11 @@ double mrpsl::simulate_trades()
         }
         else if (currscore < -mrp_threshold && position < x)
         {
-            if (position>=0)
+            if (position >= 0)
             {
                 openpositions.insert(i);
             }
-            if (position<0 && openpositions.find(last_position) != openpositions.end())
+            if (position < 0 && openpositions.find(last_position) != openpositions.end())
             {
                 openpositions.erase(last_position);
             }
@@ -123,12 +126,12 @@ double mrpsl::simulate_trades()
             counter++;
             cashflow -= spread[i];
         }
-        if(counter>0)
+        if (counter > 0)
         {
             write_orders(today, "BUY", to_string(counter), stock1_prices[i]);
             write_orders_2(today, "SELL", to_string(counter), stock2_prices[i]);
         }
-        else if(counter<0)
+        else if (counter < 0)
         {
             write_orders(today, "SELL", to_string(-counter), stock1_prices[i]);
             write_orders_2(today, "BUY", to_string(-counter), stock2_prices[i]);
