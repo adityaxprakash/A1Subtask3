@@ -106,14 +106,14 @@ void parallel(string start_date, string end_date, string cashflow_name, string o
             max_profit = max(max_profit, results[6]);
         }
     }
-    std::cout << "Results: \n";
-    std::cout << "Basic: " << results[0] << "\n";
-    std::cout << "DMA: " << results[1] << "\n";
-    std::cout << "DMA++: " << results[2] << "\n";
-    std::cout << "RSI: " << results[3] << "\n";
-    std::cout << "MACD: " << results[4] << "\n";
-    std::cout << "ADX: " << results[5] << "\n";
-    std::cout << "LR: " << results[6] << "\n";
+    // std::cout << "Results: \n";
+    // std::cout << "Basic: " << results[0] << "\n";
+    // std::cout << "DMA: " << results[1] << "\n";
+    // std::cout << "DMA++: " << results[2] << "\n";
+    // std::cout << "RSI: " << results[3] << "\n";
+    // std::cout << "MACD: " << results[4] << "\n";
+    // std::cout << "ADX: " << results[5] << "\n";
+    // std::cout << "LR: " << results[6] << "\n";
     if (max_profit == results[0])
     {
         string infile_name = "data/" + symbol + ".csv";

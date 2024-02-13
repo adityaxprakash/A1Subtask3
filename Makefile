@@ -20,15 +20,12 @@ all: $(EXECUTABLE) run
 $(EXECUTABLE): $(OBJECTS)
 	@$(CXX) $(CXXFLAGS) $^ -o $@
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp compile_msg| $(BUILDDIR) 
+$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp $(wildcard $(HEADERDIR)/*.h)| $(BUILDDIR) 
 	@echo "Compiling $<"
 	@$(CXX) $(CXXFLAGS) -I $(HEADERDIR) -c $< -o $@
 
 $(BUILDDIR):
 	@mkdir -p $(BUILDDIR)
-	
-compile_msg:
-	@echo "Compiling source files"
 	
 clean:
 	@rm -rf $(BUILDDIR)/* $(EXECUTABLE) $(DATADIR)/* $(wildcard *.csv) $(wildcard *.txt) $(.vscode)
