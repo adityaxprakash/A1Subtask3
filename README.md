@@ -102,14 +102,14 @@ Other optimizations include:
 
 ## Insights
 We played around with the values of the parameters to get a feel of how different strategies behave. We plotted all such data as follows:
-<imr src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/basic.jpeg" width="350" height="300"> 
-<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma.jpeg" width="350" height="300">
-<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma_n.jpeg" width="350" height="300">
+<imr src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/basic.jpeg" width="330" height="300"> 
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma.jpeg" width="330" height="300">
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma_n.jpeg" width="330" height="300">
 * The basic strategy was not a long-term strategy due to meager profits. It didn't give profits over a prolonged period. Increasing *n* over time bound doesn't necessarily increase the profit.
 * DMA strategy consistently gives profits over a long period while increasing with an increasing p. Increasing *n* harms the profits with time.
-<imr src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma%2B%2B.jpeg" width="350" height="300" > 
-<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/RSI.jpeg" width="350" height="300">
-<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/macd.jpeg" width="350" height="300">
+<imr src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma%2B%2B.jpeg" width="330" height="300" > 
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/RSI.jpeg" width="330" height="300">
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/macd.jpeg" width="330" height="300">
 * RSI strategy decreases with increasing n
 * DMA++ strategy dec
 * MACD good
