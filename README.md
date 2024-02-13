@@ -50,7 +50,7 @@ Other optimizations include:
 
 ## Insights
 We played around with the values of the parameters to get a feel of how different strategies behave. We plotted all such data as follows:
-<img src="https://drive.google.com/file/d/1zQuApQ1c4QVi-BcTAvM7rkIJq99bj8HO/view?usp=drive_link">
+<img src="basic2.jpg">
 *Jugaad-data does not ewrwefewf
 
 ## Mean Reverting Pairs Strategy using Stop-Loss
