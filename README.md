@@ -103,26 +103,33 @@ Other optimizations include:
 ## Insights
 We played around with the values of the parameters to get a feel of how different strategies behave. We plotted all such data as follows:
 <image src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/basic.jpeg">
-The basic strategy was not a long-term strategy due to meager profits. It didn't give profits over a prolonged period. Increasing *n* over time bound doesn't necessarily increase the profit.
+We notice that on increasing n, the profits increase to a max and then decrease. This makes sense as increasing n too much will highly decrease chances of a trade happening, but the trade made will almost always be profitable.
+
 <img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma.jpeg">
 <img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma_n.jpeg">
-DMA strategy consistently gives profits over a long period while increasing with an increasing p. Increasing *n* harms the profits with time.
+We notice increasing p increases the profit gained. On the other hand, as n increases, the general trend is that the profit falls ignoring some abrupt changes.
 
 <image src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/macd.jpeg">
-MACD good
+On increasing p, we notice an initial rise in profits following a steady decrease.
 <img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/RSI.jpeg">
-RSI strategy decreases with increasing n
+Here too on increasing n, we see a decrease in profits.
+
 <img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/dma%2B%2B.jpeg">
-DMA++ strategy dec
+ Increasing n on DMA++ we see the profits steadily fall before baselining.
 
+ The common reason for all the trends can be explained as follows: the values of n and p have an optimum range. Below that range, we are not selective enough and above it we are so restrictive that we deny most of the trades. This leads to a loss in the long run. This was the common trend we found among all strategies i.e. the parameters have some fixed ranges where the profits are the maximum and going beyond that range is unprofitable.
 
-
-
-
-
-## Mean Reverting Pairs Strategy using Stop-Loss
-We incorporated stop-loss into our mean-reverting pairs to prevent losses if the stock behaves unexpectedly. When the stock crosses the positive stop threshold, buying it back reduces our possibility of loss. Meanwhile, the stock crossing the negative stop threshold also indicates a closing signal. But this strategy is on top of our normal strategy. In case of conflicts, i.e. BUY Sell
-
+## Other Insights
 
 ## Mean Reverting Pairs Strategy using Stop-Loss
-We incorporated stop-loss into our mean reverting pairs to prevent losses if the stock behaves unexpectedly. When the stock crosses the positive stop-threshold, buying it back reduces our possibility of loss. Meanwhile, the stock crossing the negative stop-threshold also indicates a closing signal. But this strategy is on top of our normal strategy. In case of conflicts, i.e. BUY Sell
+We have incorporated stop-loss into our mean reverting pairs strategy to minimize losses if the stock behaves unexpectedly. 
+
+Suppose we have shorted the spread. When the z-score crosses the positive stop-threshold, buying back prevents our losses from piling up. On the other hand, the stock crossing the negative stop-threshold is also an indicator to close the position. The reason behind this choice is that once the score crosses the stop-threshold on either side, its an indication of unpredictability. If the z-score drops heavily, we have already made a good bunch of profit and its beneficial for us to close this highly profitable opening before it inevitably recovers.
+
+To give a general overview of the entire strategy, consider we have an overall short position currently. 
+
+* If we get a buy signal next, we try to clear the last shorted stock as well as all stocks which cross the stop-threshold on either side. Even if these coincide, we remove only these stocks.
+* If we get a sell signal next, we consider the net change in position after shorting the current stock and clearing the positions which cross the z-score. Note: the net position after this will always lie in the position constraints.
+* If we do not either signals, we stil clear all stocks which exceed the stop-loss-threshold on either side and do not create any new openings.
+
+A long position can be handled similarly.
