@@ -16,8 +16,8 @@ We have implemented several well known strategies like:
     * Basic Strategy involving montonic price increase/decrease over a fixed period of days.
     * Moving Averages(DMA) with and without maximum hold period
     * Indicators like Moving Average Convergence/Divergence(MACD), Relative Strength Index(RSI) and Average Directional Index(ADX).
-* **Linear Regression** based strategy using past trends
-* **Mean-Reverting Pairs** Trading 
+* **Linear Regression** Based strategy to train the model over past data. Since the NIFTY50 are stable stocks, linear regression fits perfectly.
+* **Mean-Reverting Pairs** By keeping the tabs on *co-Integrated* stocks we can strategise on their subsequent highs and lows during the trading period.
 
 ## Usage
 It is recommended to use this on a UNIX based system. Clone the repository into your local system and run any of the following commands on the terminal:
@@ -120,8 +120,9 @@ Here too on increasing n, we see a decrease in profits.
  The common reason for all the trends can be explained as follows: the values of n and p have an optimum range. Below that range, we are not selective enough and above it we are so restrictive that we deny most of the trades. This leads to a loss in the long run. This was the common trend we found among all strategies i.e. the parameters have some fixed ranges where the profits are the maximum and going beyond that range is unprofitable.
 
 ## Other Insights
-
-### Mean Reverting Pairs Strategy using Stop-Loss
+* Every now and then a stock splits into other stocks. Hence price and volume are not good indicators in linear regression. We should use the multiplication i.e. value*volume as a parameter.
+* Jugaad-data does not give singular values for a stock on a day. Hence we have to remove duplicates while loading data.
+## Mean Reverting Pairs Strategy using Stop-Loss
 We have incorporated stop-loss into our mean reverting pairs strategy to minimize losses if the stock behaves unexpectedly. 
 
 Suppose we have shorted the spread. When the z-score crosses the positive stop-threshold, buying back prevents our losses from piling up. On the other hand, the stock crossing the negative stop-threshold is also an indicator to close the position. The reason behind this choice is that once the score crosses the stop-threshold on either side, its an indication of unpredictability. If the z-score drops heavily, we have already made a good bunch of profit and its beneficial for us to close this highly profitable opening before it inevitably recovers.
