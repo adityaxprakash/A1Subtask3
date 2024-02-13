@@ -16,8 +16,8 @@ We have implemented several well known strategies like:
     * Basic Strategy involving montonic price increase/decrease over a fixed period of days.
     * Moving Averages(DMA) with and without maximum hold period
     * Indicators like Moving Average Convergence/Divergence(MACD), Relative Strength Index(RSI) and Average Directional Index(ADX).
-* **Linear Regression** based strategy using past trends
-* **Mean-Reverting Pairs** Trading 
+* **Linear Regression** Based strategy to train the model over past data. Since the NIFTY50 are stable stocks, linear regression fits perfectly.
+* **Mean-Reverting Pairs** By keeping the tabs on *co-Integrated* stocks we can strategise on their subsequent highs and lows during the trading period.
 
 ## Usage
 It is recommended to use this on a UNIX based system. Clone the repository into your local system and run any of the following commands on the terminal:
