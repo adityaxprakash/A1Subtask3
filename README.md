@@ -20,7 +20,7 @@ We have implemented several well known strategies like:
 * **Mean-Reverting Pairs** Trading 
 
 ## Usage
-It is recommended to use this on a UNIX based system. Clone the repository into your local system and run any of the following commands on the terminal:
+It is recommended to use this on a UNIX based system. Clone the repository into your local system and run any of the following commands on the terminal (replace a,b,c and d by desired dates in DD/MM/YYYY format):
 ```bash
     make strategy=BASIC symbol=SBIN n=5 x=2 start_date="b" end_date="a"
     make strategy=DMA symbol=SBIN n=50 x=3 p=2 start_date="a" end_date="b"
@@ -33,7 +33,7 @@ It is recommended to use this on a UNIX based system. Clone the repository into 
     make strategy=PAIRS symbol1=SBIN symbol2=ADANIENT x=5 n=20 threshold=2 start_date="a" end_date="b"
     make strategy=PAIRS symbol1=SBIN symbol2=ADANIENT x=5 n=20 threshold=2 stop_loss_threshold=4 start_date="a" end_date="b"
 ```
-Replace a,b,c and d by desired dates in DD/MM/YYYY format.
+
 To clean existing built and data files, run:
 ```bash
     make clean
