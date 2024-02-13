@@ -90,15 +90,6 @@ void lr::normal_equation(vector<vector<double>> &x_arr, vector<vector<double>> &
 {
     vector<vector<double>> a = matrix_multiplication(transpose(x_arr), x_arr);
     theta_values = matrix_multiplication(inverse(a), matrix_multiplication(transpose(x_arr), y_arr));
-    for(auto weight: theta_values)
-    {
-        for(auto w: weight)
-        {
-            cout<<w<<" ";
-        }
-        cout<<endl;
-    
-    }
 }
 
 void lr::calculatelr(vector<vector<double>> &x_arr, vector<vector<double>> &y_arr, vector<date_entry> &data_entries)

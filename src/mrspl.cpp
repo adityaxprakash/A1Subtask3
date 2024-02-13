@@ -1,12 +1,16 @@
 #include "mrpsl.h"
 
-mrpsl::mrpsl(string start, string end, double x_, int n_, double threshhold, string cashflow_file, string order_stats_file, string pandl_file, string order_stats1, string order_stats2, double stop_loss_threshhold) : strategy(start, end, x_, n_, cashflow_file, order_stats_file, pandl_file)
+mrpsl::mrpsl(string start, string end, double x_, int n_, double threshhold, string cashflow_file, string pandl_file, string order_stats1, string order_stats2, double stop_loss_threshhold) : strategy(start, end, x_, n_, cashflow_file, order_stats1, pandl_file), orders_2(order_stats2, "Date,Order_dir,Quantity,Price")
 {
 
     mrp_threshold = threshhold;
-    order_stats_file1 = order_stats1;
-    order_stats_file2 = order_stats2;
     stop_loss_threshold = stop_loss_threshhold;
+}
+
+void mrpsl::write_orders_2(string date, string action, string quantity, double price)
+{
+    string to_write = date + "," + action + "," + quantity + "," + to_string(price);
+    orders_2.write(to_write);
 }
 
 void mrpsl::calculate_mrp()
@@ -46,27 +50,27 @@ void mrpsl::calculate_mrp()
 
 double mrpsl::simulate_trades()
 {
-    ofstream ofile1(order_stats_file1);
-    ofstream ofile2(order_stats_file2);
     for (int i = 1; i < spread.size(); i++)
     {
         if (i <= n)
         {
             continue;
         }
+
         string today = entries[i].date;
         set<int> to_remove;
-        string tday = "";
         double currscore = z_score[i - n];
+
         int last_position = i;
         if (!openpositions.empty())
             last_position = *openpositions.begin();
+
         int mode = 0;
-        // int delta_pos=0;
         int counter = 0;
-        if (openpositions.size() > 0)
+
+        if (position != 0)
         {
-            if (z_score[*openpositions.begin()-n] > 0)
+            if (position < 0)
             {
                 mode = 1;
             }
@@ -79,7 +83,7 @@ double mrpsl::simulate_trades()
                 if (abs(spread[i] - rolling_mean[ele]) > stop_loss_threshold * rolling_std[ele])
                 {
                     counter += mode;
-                    cashflow -= mode*spread[i];
+                    cashflow -= mode * spread[i];
                     to_remove.insert(ele);
                 }
             }
@@ -87,80 +91,50 @@ double mrpsl::simulate_trades()
             {
                 openpositions.erase(ele);
             }
-            position+=counter;
-            counter=0;
+            position += counter;
         }
 
-        if (currscore > mrp_threshold && currscore<stop_loss_threshold&&  position>-x)
+        if (currscore > mrp_threshold && position > -x)
         {
-            tday = "SELL";
-            // if (mode == 1 && position + to_remove.size() > -x)
-            // {
-            //     position--;
-            // }
-            // else if (mode == -1)
-            // {
-            //     to_remove.insert(openpositions[1]);
-            // }
-            if(mode==0 || mode==1 || (mode==-1 && openpositions.empty()))
+            if (position<=0)
             {
                 openpositions.insert(i);
             }
-            if(mode==-1 && openpositions.find(last_position)!=openpositions.end())
+            if (position>0 && openpositions.find(last_position) != openpositions.end())
             {
                 openpositions.erase(last_position);
-            }   
-            
+            }
+
+            position--;
             counter--;
-            cashflow+=spread[i];
+            cashflow += spread[i];
         }
-        else if (currscore < -mrp_threshold &&currscore>-stop_loss_threshold&& position<x)
+        else if (currscore < -mrp_threshold && position < x)
         {
-            tday = "BUY";
-            // if (mode == -1 && position - to_remove.size() < x)
-            // {
-            //     position++;
-            // }
-            // else if (mode == 1)
-            // {
-            //     to_remove.insert(openpositions[1]);
-            if(mode==0 || mode==-1 || (mode==1 && openpositions.empty()))
+            if (position>=0)
             {
                 openpositions.insert(i);
             }
-            if(mode==1 && openpositions.find(last_position)!=openpositions.end())
+            if (position<0 && openpositions.find(last_position) != openpositions.end())
             {
                 openpositions.erase(last_position);
-            }   
+            }
+            position++;
             counter++;
-            cashflow-=spread[i];
+            cashflow -= spread[i];
         }
-        // for (auto x : to_remove)
-        // {
-        //     openpositions.erase(remove(openpositions.begin(), openpositions.end(), x), openpositions.end());
-        //     if (mode == 1)
-        //     {
-        //         cashflow += spread[i] - spread[x];
-        //         counter++;
-        //         position++;
-        //     }
-        //     else
-        //     {
-        //         cashflow += spread[x] - spread[i];
-        //         counter--;
-        //         position--;
-        //     }
-        // }
-        if (counter)
+        if(counter>0)
         {
-            position += counter;
-            tday=counter>0?"BUY":"SELL";
-            ofile1 << today << "," << tday << "," << counter << "," << stock1_prices[i] << endl;
-            ofile2 << today << "," << (tday == "BUY" ? "SELL" : "BUY") << "," << counter << "," << stock2_prices[i] << endl;
+            write_orders(today, "BUY", to_string(counter), stock1_prices[i]);
+            write_orders_2(today, "SELL", to_string(counter), stock2_prices[i]);
+        }
+        else if(counter<0)
+        {
+            write_orders(today, "SELL", to_string(-counter), stock1_prices[i]);
+            write_orders_2(today, "BUY", to_string(-counter), stock2_prices[i]);
         }
         write_daily_flow(today, cashflow);
     }
-    cout<<position<<endl;
     write_pandl(cashflow + position * spread[spread.size() - 1]);
     return cashflow + position * spread[spread.size() - 1];
 }

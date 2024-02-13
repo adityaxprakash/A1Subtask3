@@ -31,7 +31,7 @@ void mrp::calculate_mrp()
     vector<double> rolling_std = {0};
     vector<double> sum = {0};
     vector<double> square_sum = {0};
-
+    // cout<<entries.size()<<" "<<stock1_prices.size()<<" "<<stock2_prices.size()<<endl;   
     for (int i = 1; i < stock1_prices.size(); i++)
     {
         spread.push_back(stock1_prices[i] - stock2_prices[i]);
@@ -95,6 +95,22 @@ double mrp::predict(string filename, string filename2)
     for (auto entry : parser.parse_csv(filename2))
     {
         entries.push_back(entry);
+    }
+
+    map<string,vector<int>> dates_wrong;
+    for(int i=1;i<=entries.size();i++)
+    {
+        dates_wrong[entries[i].date].push_back(i);
+    }
+
+    for(auto date:dates_wrong)
+    {
+        string date_=date.first;
+        vector<int> no= date.second;
+        if(no.size()<2)
+        {
+           entries.erase(no[1]+entries.begin());
+        }
     }
     store_stock_prices();
     calculate_mrp();

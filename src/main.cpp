@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            mrpsl tool(start_date, end_date, x, n, threshold, cashflow_name, order_name, pandl_name, order_stat1, order_stat2, stop_loss_threshold);
+            mrpsl tool(start_date, end_date, x, n, threshold, cashflow_name, pandl_name, order_stat1, order_stat2, stop_loss_threshold);
             tool.predict(infile_name1, infile_name2);
         }
         return 0;

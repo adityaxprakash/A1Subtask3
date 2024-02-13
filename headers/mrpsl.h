@@ -21,10 +21,13 @@ class mrpsl : public strategy
         vector<double> sum={0};
         vector<double> square_sum={0};
         vector<double> z_score={0};
+        writer orders_2;
+        void write_orders_2( string date, string action, string quantity, double price);
+        
         void calculate_mrp();
         double simulate_trades();
     public:
-        mrpsl(string start, string end, double x_, int n_, double threshhold,string cashflow_file, string order_stats_file, string pandl_file,string order_stats1,string order_stats2,double stop_loss_threshhold);
+        mrpsl(string start, string end, double x_, int n_, double threshhold,string cashflow_file, string pandl_file,string order_stats1,string order_stats2,double stop_loss_threshhold);
         double predict(string filename) override;  
         double predict(string filename1, string filename2) ;
 };

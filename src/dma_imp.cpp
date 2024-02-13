@@ -88,12 +88,11 @@ double dma_imp::simulate_trades()
         }
         else if (curr_ama - curr_price >= p*curr_ama/100.0 )
         {
-            // cout<<"here"<<endl;
+
             if (i - last_sold >= max_hold_days)
             {
                 sold_date.pop_front();
                 sold_date.push_back(i);
-                continue;
             }
             else if(position>-x)
             {
@@ -129,36 +128,6 @@ double dma_imp::simulate_trades()
                 position++;
                 write_orders(today, "BUY", "1", curr_price);
             }
-            // if (last_bought < last_sold)
-            // {
-            //     if (position == -x)
-            //     {
-            //         continue;
-            //     }
-            //     if (last_bought < i)
-            //     {
-            //         bought_date.pop_front();
-            //     }
-            //     sold_date.push_back(i);
-            //     cashflow += curr_price;
-            //     position--;
-            //     write_orders(today, "SELL", "1", curr_price);
-            // }
-            // else if (last_sold < last_bought)
-            // {
-            //     if (position == x)
-            //     {
-            //         continue;
-            //     }
-            //     if (last_sold < i)
-            //     {
-            //         sold_date.pop_front();
-            //     }
-            //     bought_date.push_back(i);
-            //     cashflow -= curr_price;
-            //     position++;
-            //     write_orders(today, "BUY", "1", curr_price);
-            // }
         }
         write_daily_flow(today, cashflow);
     }
