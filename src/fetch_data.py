@@ -9,6 +9,7 @@ def write_stock_data(symbol_name, start_date, end_date, n, output_file):
     end_date = datetime.strptime(end_date, "%d/%m/%Y")
     columns=['DATE','CLOSE','OPEN','HIGH','LOW','NO OF TRADES','PREV. CLOSE','VWAP']
     df = get_stock_data(symbol_name, start_date, end_date, n,columns)
+    df=df.drop_duplicates(subset=['DATE'],inplace=False)
     df.to_csv(output_file,index=False)
 
 def get_stock_data(symbol_name, start_date, end_date,n,columns):
