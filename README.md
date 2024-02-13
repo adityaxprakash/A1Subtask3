@@ -102,7 +102,7 @@ Other optimizations include:
 
 ## Insights
 We played around with the values of the parameters to get a feel of how different strategies behave. We plotted all such data as follows:
-<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/RSI.jpeg" width="50" height="50">
+<img src="https://raw.githubusercontent.com/adityaxprakash/Benchmark-code-for-A1/main/RSI.jpeg" width="400" height="600">
 *Jugaad-data does not ewrwefewf
 
 ## Mean Reverting Pairs Strategy using Stop-Loss
