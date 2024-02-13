@@ -40,18 +40,18 @@ vector<vector<double>> transpose(vector<vector<double>> A)
     }
     return result;
 }
+
 vector<vector<double>> inverse(vector<vector<double>> &matrix)
 {
     int n = matrix.size();
 
     vector<vector<double>> inverse(n, vector<double>(n, 0));
-    // Initialize the identity matrix for inverse
+    
     for (int i = 0; i < n; ++i)
         inverse[i][i] = 1;
 
     for (int i = 0; i < n; ++i)
     {
-        // Find pivot
         int pivot = i;
         for (int j = i + 1; j < n; ++j)
         {
@@ -59,11 +59,9 @@ vector<vector<double>> inverse(vector<vector<double>> &matrix)
                 pivot = j;
         }
 
-        // Swap pivot row with current row
         swapRows(matrix, i, pivot);
         swapRows(inverse, i, pivot);
 
-        // Make diagonal elements of the current row to 1
         double divisor = matrix[i][i];
         for (int j = 0; j < n; ++j)
         {
@@ -71,7 +69,6 @@ vector<vector<double>> inverse(vector<vector<double>> &matrix)
             inverse[i][j] /= divisor;
         }
 
-        // Make other elements of the current column to 0
         for (int j = 0; j < n; ++j)
         {
             if (j != i)
@@ -106,11 +103,9 @@ void lr::normal_equation(vector<vector<double>> &x_arr, vector<vector<double>> &
 
 void lr::calculatelr(vector<vector<double>> &x_arr, vector<vector<double>> &y_arr, vector<date_entry> &data_entries)
 {
-    // cout<<"Called"<<" "<<entries.size()<<endl;
     for (int i = 0; i < data_entries.size() - 1; i++)
     {
         vector<double> temp;
-        // cout<<entries[i].high<<" "<<endl;
         temp.push_back(1);
         temp.push_back(data_entries[i].high);
         temp.push_back(data_entries[i].low);
@@ -123,16 +118,14 @@ void lr::calculatelr(vector<vector<double>> &x_arr, vector<vector<double>> &y_ar
         y_arr.push_back({data_entries[i + 1].close});
     }
 }
+
 double lr::simulate_trade(string cashflow_file, string order_stats_file, string pandl_file, vector<vector<double>> &x_arr, vector<vector<double>> &y_arr)
 {
     predictions_values = matrix_multiplication(x_arr, theta_values);
-    // cout << "Predictions size: " << predictions_values.size() << " " << predictions_values[0].size() << endl;
-
     int sim_days = x_arr.size();
     for (int i = 0; i < sim_days; i++)
     {
         string today = test_entries[i+1].date;
-        // cout << "Predictions: " << predictions_values[i][0] << " " << y_arr[i][0] << endl;
         if (predictions_values[i][0] - y_arr[i][0] >= p * (y_arr[i][0]) / 100.0 && position < x)
         {
             position++;

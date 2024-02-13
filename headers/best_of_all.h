@@ -64,7 +64,7 @@ void parallel(string start_date, string end_date, string cashflow_name, string o
         {
             string infile_name = "data/" + names[2] + ".csv";
             get_stock_data(symbol, 14, start_date, end_date, infile_name);
-            dma_imp t3(start_date, end_date, x, 14, 5, 28, 0.2,2, cashflow_name, order_name, pandl_name);
+            dma_imp t3(start_date, end_date, x, 14, 5, 28, 2,0.2, cashflow_name, order_name, pandl_name);
             results[2] = t3.predict(infile_name);
             max_profit = max(max_profit, results[2]);
         }

@@ -29,42 +29,40 @@ void adx::calculate_adx()
         true_range.push_back(max(curr_high - curr_low, max(curr_high - curr_prev_close, curr_low - curr_prev_close)));
         plus_dm.push_back(max(0.0, curr_high - prev_high));
         minus_dm.push_back(max(0.0, curr_low - prev_low));
-        // cout<<true_range[i]<<" "<<plus_dm[i]<<" "<<minus_dm[i]<<" "<<curr_low<<endl;
     }
+
+    to_skip.resize(num_days, 0);
     atr.push_back(true_range[n + 1]);
-    // cout<<atr[1]<<" ";
     plus_di.push_back(plus_dm[n + 1] / atr[1]);
     minus_di.push_back(minus_dm[n + 1] / atr[1]);
-    // cout<<plus_di[1]<<" "<<minus_di[1]<<" ";
-    if (abs(plus_di[1] + minus_di[1]) < 1e-6)
+   
+    if (fabs(plus_di[1] + minus_di[1]) < 1e-6)
     {
         dx.push_back(0);
-        adx_arr.push_back(adx_threshhold);
+        to_skip[n+1]=1;
     }
     else
     {
         dx.push_back(100 * (plus_di[1] - minus_di[1]) / (plus_di[1] + minus_di[1]));
-        adx_arr.push_back(dx[1]);
+        
     }
-    // cout<<adx_arr[1]<<" "<<dx[1]<<endl;
+    adx_arr.push_back(dx[1]);
     for (int i = 2; i < num_days - n; i++)
     {
         double curr_atr = calculate_ewm(n, atr[i - 1], true_range[i + n]);
-        // cout<<curr_atr<<endl;
         atr.push_back(curr_atr);
         plus_di.push_back(calculate_ewm(n, plus_di[i - 1], plus_dm[i + n] / curr_atr));
         minus_di.push_back(calculate_ewm(n, minus_di[i - 1], minus_dm[i + n] / curr_atr));
-        if (abs(plus_di[i] + minus_di[i]) < 1e-6)
+        if (fabs(plus_di[i] + minus_di[i]) < 1e-6)
         {
             dx.push_back(0);
-            adx_arr.push_back(adx_threshhold);
+            to_skip[i+n]=1;
         }
         else
         {
             dx.push_back(100 * (plus_di[i] - minus_di[i]) / (plus_di[i] + minus_di[i]));
-            adx_arr.push_back(calculate_ewm(n, adx_arr[i - 1], dx[i]));
         }
-        // cout << adx_arr[i] << " " << dx[i] << endl;
+        adx_arr.push_back(calculate_ewm(n, adx_arr[i - 1], dx[i]));
     }
 }
 
@@ -77,6 +75,11 @@ double adx::simulate_trades()
         double curr_adx = adx_arr[i];
         double curr_price = entries[i + n].close;
         string today = entries[i + n].date;
+        if(to_skip[i+n]==1)
+        {
+            write_daily_flow(today, cashflow);
+            continue;
+        }
 
         if (curr_adx > adx_threshhold && position < x)
         {
