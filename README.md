@@ -50,5 +50,9 @@ Other optimizations include:
 
 ## Insights
 We played around with the values of the parameters to get a feel of how different strategies behave. We plotted all such data as follows:
+<img src="https://drive.google.com/file/d/1zQuApQ1c4QVi-BcTAvM7rkIJq99bj8HO/view?usp=drive_link">
+*Jugaad-data does not ewrwefewf
 
+## Mean Reverting Pairs Strategy using Stop-Loss
+We incorporated stop-loss into our mean reverting pairs to prevent losses if the stock behaves unexpectedly. When the stock crosses the positive stop-threshold, buying it back reduces our possibility of loss. Meanwhile, the stock crossing the negative stop-threshold also indicates a closing signal. But this strategy is on top of our normal strategy. In case of conflicts, i.e. BUY Sell
 
